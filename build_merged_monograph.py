@@ -1,0 +1,375 @@
+# -*- coding: utf-8 -*-
+"""
+Script que genera KKT_G_Markowitz.tex:
+1. Sin ningun \textbf ni ** (estilo limpio sin negrita).
+2. Sin ambiente de teorema para semicovarianza (explicado de forma narrativa).
+3. Tablas perfectamente dimensionadas (\footnotesize, tabcolsep ajustado) para no truncarse ni desbordar margenes.
+4. Preserva el 100% de la deduccion matematica, matrices A y b, y extensiones.
+"""
+
+tex_content = r"""\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\geometry{top=2.2cm,bottom=2.2cm,left=2.2cm,right=2.2cm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\hypersetup{colorlinks=true,linkcolor=blue!70!black,citecolor=blue!70!black,urlcolor=blue!70!black}
+
+\title{Selección de Portafolios Multiperiodo de Markowitz con Condiciones KKT\\
+\large Modelado Teórico, Regulación SFC (Límites del 20\%), Estimadores Asimétricos (EWMA, Estrada, GJR-GARCH $t$ y Skewed-$t$) y Validación Walk-Forward en la BVC}
+\author{Juan Mario Delgado Molina}
+\date{Septiembre 29, 2026 (Actualizado: Noviembre 2026)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Este documento consolida el marco metodológico de selección de carteras intertemporales bajo condiciones de Karush-Kuhn-Tucker (KKT) formulado originalmente por Draviam \& Chellathurai (2002), preservando la deducción analítica rigurosa de la riqueza descontada, el sistema de autofinanciamiento presupuestario $AU = b$, la interpretación de los multiplicadores de Lagrange (precios sombra $Y$), la implementación computacional básica en el mercado accionario colombiano, y desarrolla formalmente la integración matemática de los campos de mejora: (i) la incorporación de límites prudenciales de concentración por emisor ($w_{\max} = 20\%$, Decreto 2555 de 2010) y condiciones KKT con doble conjunto activo (precios sombra regulatorios $Z$); (ii) el ajuste de retorno total continuo por dividendos de Merton ($q_i$); (iii) la modelación de asimetría de colas mediante semi-covarianza a la baja de Estrada ($\Sigma^- \succeq 0$); y (iv) la formulación del Estado del Arte paramétrico no neuronal para volatilidad condicional asimétrica mediante GJR-GARCH(1,1) con innovaciones Student-$t$ y Skewed Student-$t$ de Hansen (1994), derivando su estructura temporal analítica cerrada de proyección de varianza a $h$ etapas para alimentar la optimización multiperiodo sobre un universo ampliado de 10 acciones del índice MSCI COLCAP en 25 trimestres fuera de muestra (2021--2026).
+\end{abstract}
+
+\section{Descripción del Problema}
+
+\subsection{Contexto y Aplicación Real}
+En la gestión de inversiones institucionales (como fondos de pensión, bancas privadas y fondos patrimoniales), las decisiones financieras se toman a lo largo de un horizonte de inversión compuesto por múltiples fechas de negociación $t_0, t_1, \dots, t_M$ hasta un horizonte final $t_{M+1}$.
+
+El problema consiste en determinar la estrategia de rebalanceo óptimo que maximice el rendimiento esperado ajustado por riesgo al final del periodo de inversión, ajustado por la disponibilidad presupuestaria de un gestor de portafolio y, en casos como el de Colombia, la imposibilidad regulatoria de vender en corto activos que no se poseen (Decreto 2555 de 2010).
+
+\subsection{¿Por qué es importante optimizar esta situación?}
+El modelo multiperiodo captura las correlaciones intertemporales y cruzadas de los precios ($\mathrm{Cov}(S_{i,j}, S_{k,n})$ para $j \neq n$). Al invertir sin tomar en cuenta la dimensión temporal y optimizar periodo a periodo de forma miope, el resultado lleva a estrategias subóptimas, costos transaccionales excesivos e incapacidad para aprovechar la autocorrelación en los precios de los activos.
+
+\section{Objetivo del Modelo Básico}
+El modelo matemático busca minimizar el riesgo global del portafolio, medido a través de la varianza de la tasa de beneficio descontada a valor presente $\sigma_R^2$, mientras se maximiza el retorno esperado $R_E$ ajustado por un parámetro de aversión al riesgo $\theta'$.
+
+La función objetivo se formula como:
+\begin{equation}
+    \min_U F(U) = -\theta' P^T U + \frac{1}{2} U^T C U
+\end{equation}
+donde:
+\begin{itemize}
+    \item $U = (U_0^T, U_1^T, \dots, U_M^T)^T \in \mathbb{R}^{(M+1)(N+1)}$ es el vector global de decisiones de posición en cada fecha de rebalanceo, donde cada $U_j = (U_{0,j}, U_{1,j}, \dots, U_{N,j})^T$ contiene las unidades del activo libre de riesgo y los $N$ activos riesgosos.
+    \item $C \in \mathbb{R}^{(M+1)(N+1)\times (M+1)(N+1)}$ es la matriz de covarianza intertemporal de precios tridiagonal por bloques.
+    \item $P$ es el vector de precios esperados descontados de los activos en el horizonte terminal.
+    \item $\theta'$ representa la tolerancia al riesgo del inversionista.
+\end{itemize}
+
+\section{Variables y Restricciones Identificadas}
+
+\subsection{Variables de Decisión}
+\begin{itemize}
+    \item $U_{i,j}$: Número de acciones retenidas del activo riesgoso $i$ ($i = 1, \dots, N$) en la fecha $t_j$ ($j = 0, 1, \dots, M$).
+    \item $U_{0,j}$: Unidades retenidas del activo libre de riesgo (índice $i = 0$) en la fecha $t_j$.
+    \item $a_{i,j} = U_{i,j} - U_{i,j-1}$: Cantidad de acciones compradas o vendidas del activo $i$ en la fecha de rebalanceo $t_j$.
+\end{itemize}
+
+\subsection{Restricciones Lineales del Sistema}
+
+\subsubsection{Restricción de Presupuesto Inicial \texorpdfstring{($t_0 = 0$)}{(t0 = 0)}}
+Al inicio del horizonte ($t = 0$), todo el capital disponible $X$ debe ser asignado entre los activos disponibles. Dado que los precios iniciales $S_{i,0}$ son conocidos de forma determinística:
+\begin{equation}
+    \sum_{i=0}^N S_{i,0} U_{i,0} = X \implies p_0^T U_0 = \frac{X}{\mu_{R,0}}
+\end{equation}
+donde $p_0 = \frac{S_0}{\mu_{R,0}}$ es el vector de precios iniciales normalizados respecto al activo numéraire $\mu_{R,0} = S_{0,0}$.
+
+\subsubsection{Conservación Esperada de la Riqueza \texorpdfstring{($t_j$, para $j = 1, \dots, M$)}{(tj, j = 1...M)}}
+En cada fecha intermedia de rebalanceo $t_j$, los costos de compras tienen que ser iguales a los ingresos por ventas:
+\begin{equation}
+    \sum_{i=0}^N S_{i,j} (U_{i,j} - U_{i,j-1}) = 0, \quad j = 1, \dots, M
+\end{equation}
+Dado que los precios futuros $S_{i,j}$ son variables aleatorias vistas desde $t_0$, la conservación de riqueza se impone sobre el valor esperado del precio descontado:
+\begin{equation}
+    p_j^T (U_j - U_{j-1}) = 0, \quad \text{donde } p_j = \mathbb{E}\left[ \frac{S_j}{\mu_{R,j}} \right]
+\end{equation}
+
+Agrupando el presupuesto inicial y la conservación esperada de riqueza, se obtiene el sistema matricial de igualdad:
+\begin{equation}
+    AU = b
+\end{equation}
+donde $A \in \mathbb{R}^{(M+1)\times (M+1)(N+1)}$ adopta la estructura bidiagonal por bloques:
+\begin{equation}
+A = \begin{pmatrix}
+p_0^T & \mathbf{0}^T & \mathbf{0}^T & \dots & \mathbf{0}^T \\
+-p_1^T & p_1^T & \mathbf{0}^T & \dots & \mathbf{0}^T \\
+\mathbf{0}^T & -p_2^T & p_2^T & \dots & \mathbf{0}^T \\
+\vdots & \vdots & \ddots & \ddots & \vdots \\
+\mathbf{0}^T & \mathbf{0}^T & \dots & -p_M^T & p_M^T
+\end{pmatrix}, \qquad
+b = \begin{pmatrix} X / \mu_{R,0} \\ 0 \\ 0 \\ \vdots \\ 0 \end{pmatrix}
+\end{equation}
+
+\subsubsection{Prohibición de Ventas en Corto}
+Para evitar la venta en corto de activos riesgosos y la toma de crédito apalancado sobre el activo libre de riesgo, se exige:
+\begin{equation}
+    -U \le \mathbf{0} \iff U_{i,j} \ge 0 \quad \forall i = 0, \dots, N, \quad j = 0, \dots, M
+\end{equation}
+
+\section{Método de Solución: Condiciones KKT del Modelo Básico}
+El problema planteado es una Programación Cuadrática Multiperiodo (QP) con restricciones lineales y cotas de no negatividad. Se define la función Lagrangiana con multiplicadores $\Lambda \in \mathbb{R}^{M+1}$ para las igualdades e $Y \in \mathbb{R}^{(M+1)(N+1)}$ para las desigualdades:
+\begin{equation}
+    \mathcal{L}(U, \Lambda, Y) = -\theta' P^T U + \frac{1}{2} U^T C U + \Lambda^T (AU - b) - Y^T U
+\end{equation}
+
+Las condiciones necesarias y suficientes de optimalidad KKT son:
+\begin{enumerate}
+    \item Estacionariedad: $\nabla_U \mathcal{L} = CU + A^T \Lambda - \theta' P - Y = \mathbf{0} \implies CU + A^T \Lambda = \theta' P + Y$
+    \item Factibilidad Primal: $AU = b$ y $U \ge \mathbf{0}$
+    \item Factibilidad Dual: $Y \ge \mathbf{0}$
+    \item Holgura Complementaria: $U_{i,j} Y_{i,j} = 0 \quad \forall i = 0, \dots, N, \quad j = 0, \dots, M$
+\end{enumerate}
+
+\subsection{Interpretación Financiera de los Precios Sombra}
+Para cada activo $i$ en la fecha $t_j$:
+\begin{itemize}
+    \item Si $U_{i,j} > 0$: entonces $Y_{i,j} = 0$. El activo se incluye activamente en el portafolio.
+    \item Si $U_{i,j} = 0$: la restricción está activa y $Y_{i,j} \ge 0$. El multiplicador $Y_{i,j}$ representa el precio sombra o subsidio de retorno marginal que el mercado debería ofrecer para que resulte rentable comprar dicho activo.
+\end{itemize}
+
+\section{Implementación Básica Piloto en el Mercado Colombiano (4 Activos)}
+
+Se implementó inicialmente el caso base en Python utilizando CVXPY con el solver OSQP, alimentado con datos reales del mercado accionario colombiano:
+\begin{itemize}
+    \item Universo de Renta Variable (MSCI COLCAP): Cuatro acciones: Bancolombia (\texttt{CIBEST.CL}), Ecopetrol (\texttt{ECOPETROL.CL}), Corficolombiana (\texttt{CORFICOLCF.CL}) y Cementos Argos (\texttt{CEMARGOS.CL}).
+    \item Activo Libre de Riesgo ($i=0$): Títulos de Deuda Pública Soberana (TES Clase B) con rendimiento fijo anualizado de $r = 9.5\%$ E.A.
+    \item Horizonte de Planeación Intertemporal: $M = 3$ etapas trimestrales ($\Delta t = 0.25$ años, horizonte 1 año).
+    \item Ventana de Calibración In-Sample: $L = 504$ días hábiles bursátiles (2 años).
+    \item Paso de Rebalanceo Walk-Forward: $\Delta_{\mathrm{roll}} = 63$ días hábiles (1 trimestre).
+\end{itemize}
+
+\subsection{Dinámica Estocástica GBMM y Matrices del Sistema}
+Las derivas continuas $\alpha_i$ y volatilidades $\sigma_i$ se estiman con la corrección del Lema de Itô: $\alpha_i = \bar{r}_i \cdot 252 + \frac{1}{2}\sigma_i^2$. La matriz $C$ se ensambla analíticamente a partir de las covarianzas intertemporales cerradas del Movimiento Browniano Geométrico Multivariado:
+\begin{equation}
+    \mathrm{Cov}(p_{i,j}, p_{k,n}) = e^{(\alpha_i + \alpha_k - 2r)\min(t_j, t_n)} \left( e^{\rho_{ik} \sigma_i \sigma_k \min(t_j, t_n)} - 1 \right)
+\end{equation}
+
+\subsection{Resultados Numéricos de Verificación KKT en Etapa \texorpdfstring{$t_0$}{t0} (Caso Base 4 Activos)}
+En la ventana piloto inicial sin restricciones de cota superior, el optimizador cuadrático resolvió el sistema verificando las condiciones de complementariedad:
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccc}
+\toprule
+Activo & Ponderación $U_0^*$ & Sombra $Y_0^*$ & Holgura $U \cdot Y$ & Estado KKT \\
+\midrule
+Activo Libre de Riesgo (TES) & 0.0000 & 0.1191 & 0.0000 & Excluido ($Y > 0$) \\
+Bancolombia (\texttt{CIBEST.CL}) & 0.0000 & 0.1460 & 0.0000 & Excluido ($Y > 0$) \\
+Ecopetrol (\texttt{ECOPETROL.CL}) & 0.3541 & 0.0000 & 0.0000 & Incluido ($Y = 0$) \\
+Corficolombiana (\texttt{CORFICOLCF.CL}) & 0.6459 & 0.0000 & 0.0000 & Incluido ($Y = 0$) \\
+Cementos Argos (\texttt{CEMARGOS.CL}) & 0.0000 & 0.1266 & 0.0000 & Excluido ($Y > 0$) \\
+\midrule
+Suma Presupuestaria & 1.0000 & --- & --- & Restricción $AU=b$ \\
+\bottomrule
+\end{tabular}
+\caption{Auditoría de condiciones KKT en la etapa inicial de inversión ($t_0$) sin límites de concentración.}
+\end{table}
+
+Los multiplicadores de igualdad resultaron $\Lambda = [1.2899, 1.1708, 1.0631, 1.0000]^T$, confirmando teóricamente que el valor marginal de la riqueza descontada decrece monótonamente hacia la unidad en el instante de liquidación.
+
+\subsection{Desempeño Fuera de Muestra del Caso Base (Walk-Forward 2021--2026)}
+Siguiendo la política de Control Predictivo por Modelo (MPC), en cada trimestre se ejecutó exclusivamente la primera asignación $U_0^*$:
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+Estrategia / Portafolio & Ret. Total & CAGR & Volatilidad & Sharpe & Max DD & Calmar \\
+\midrule
+Portafolio KKT Básico (4 Activos) & $+78.70\%$ & $10.21\%$ & $32.27\%$ & $0.18$ & $-48.84\%$ & $0.21$ \\
+Benchmark Equal-Weight ($1/N = 25\%$) & $+148.31\%$ & $16.45\%$ & $22.96\%$ & $0.38$ & $-39.32\%$ & $0.42$ \\
+Activo Libre de Riesgo TES ($9.5\%$) & $+71.95\%$ & $9.50\%$ & $0.00\%$ & $-0.26$ & $0.00\%$ & --- \\
+\bottomrule
+\end{tabular}
+\caption{Métricas financieras fuera de muestra del modelo básico (4 activos, 2021--2026).}
+\end{table}
+
+\section{Diagnóstico y los Cinco Campos Estructurales de Mejora}
+
+La implementación básica confirmó la viabilidad computacional y la elegancia teórica de Draviam \& Chellathurai, pero evidenció una debilidad crítica: un Máximo Drawdown del $-48.84\%$ derivado de la sobre-concentración en pocos activos y la inercia de la covarianza muestral estática. Se definieron formalmente cinco campos estructurales de trabajo cuantitativo:
+
+\begin{enumerate}
+    \item Campo de Dinámica de Volatilidad y Memoria Reciente (Modelos EWMA / GARCH):
+    Sustituir la covarianza muestral estática por estimadores de ponderación exponencial decreciente (EWMA con factor $\lambda \in [0.94, 0.97]$) y modelos heterocedásticos condicionales para capturar el agrupamiento de volatilidad (\emph{volatility clustering}).
+    \item Campo de Estimación de Señal de Retorno y Flujo de Dividendos:
+    Incorporar precios de retorno total ajustados y modelar la tasa de dividendos continuos de Merton ($q_i$), esencial en acciones colombianas con dividend yields superiores al $8\%-18\%$.
+    \item Campo de Fricciones de Mercado y Microestructura Bursátil:
+    Regularización sobre la rotación de cartera (\emph{turnover penalty}) para controlar costos de transacción.
+    \item Campo de Restricciones Prudenciales y Límites Regulatorios:
+    Imponer cotas superiores de concentración por emisor ($U_{i,j} \le w_{\max} = 0.20$), forzando la diversificación institucional bajo el Decreto 2555 de 2010.
+    \item Campo de Estructura Temporal de Tasas de Interés Soberanas:
+    Modelación de curva de rendimientos cero cupón de títulos TES.
+\end{enumerate}
+
+\section{Desarrollo e Integración del Campo 4: Regulación SFC y Límites de Concentración \texorpdfstring{($w_{\max} = 20\%$)}{(w\_max = 20\%)}}
+
+\subsection{Formulación Matemática de la Cota Superior}
+Bajo el régimen prudencial de la Superintendencia Financiera de Colombia para inversionistas institucionales (fondos de pensiones y fiduciarias), ninguna posición accionaria individual puede superar el $20\%$ del valor del portafolio en ningún periodo:
+\begin{equation}
+    U_{i,j} \le w_{\max} = 0.20 \quad \forall i = 1, \dots, N, \quad \forall j = 0, \dots, M
+\end{equation}
+El activo numéraire libre de riesgo ($i=0$) queda exento de esta restricción, permitiendo un refugio total del $100\%$ en títulos TES en coyunturas de estrés sistémico.
+
+\subsection{Lagrangiano con Doble Conjunto Activo y Condiciones KKT Extendidas}
+Asociando los multiplicadores de igualdad $\Lambda \in \mathbb{R}^{M+1}$, los precios sombra de exclusión $Y \ge \mathbf{0}$ para la no negatividad y los precios sombra regulatorios $Z \in \mathbb{R}^{(M+1)N}$ para las cotas superiores, el Lagrangiano generalizado es:
+\begin{equation}
+    \mathcal{L}(U, \Lambda, Y, Z) = -\theta' P^T U + \frac{1}{2} U^T C U + \Lambda^T (AU - b) - Y^T U + Z^T (U - U_{\max})
+\end{equation}
+
+Las condiciones necesarias y suficientes de Karush-Kuhn-Tucker son:
+\begin{enumerate}
+    \item Estacionariedad Generalizada:
+    \begin{equation}
+        \nabla_U \mathcal{L} = CU + A^T \Lambda - \theta' P - Y + Z = \mathbf{0} \iff CU + A^T \Lambda = \theta' P + Y - Z
+    \end{equation}
+    \item Factibilidad Primal: $AU = b$, $U \ge \mathbf{0}$, y $U_{i,j} \le w_{\max}$ para todo $i \ge 1$.
+    \item Factibilidad Dual: $Y \ge \mathbf{0}$ y $Z \ge \mathbf{0}$.
+    \item Holguras Complementarias Duales:
+    \begin{equation}
+        U_{i,j} \cdot Y_{i,j} = 0 \quad \text{y} \quad (w_{\max} - U_{i,j}) \cdot Z_{i,j} = 0 \quad \forall i \ge 1, \forall j
+    \end{equation}
+\end{enumerate}
+
+\subsection{Interpretación Trilateral de los Precios Sombra}
+Para cada activo $i$ en cada etapa $t_j$:
+\begin{itemize}
+    \item Solución Interior ($0 < U_{i,j} < w_{\max}$): Ambos multiplicadores son nulos ($Y_{i,j} = 0, Z_{i,j} = 0$). La asignación es óptima y no restringida por las cotas.
+    \item Activo Excluido ($U_{i,j} = 0$): $Y_{i,j} > 0$ y $Z_{i,j} = 0$. $Y_{i,j}$ mide el subsidio de retorno que el activo requeriría para entrar a la cartera.
+    \item Activo Saturado en el Tope ($U_{i,j} = w_{\max}$): $Y_{i,j} = 0$ y $Z_{i,j} > 0$. $Z_{i,j}$ es el precio sombra regulatorio: cuantifica el costo de oportunidad o retorno marginal que el portafolio sacrifica debido al límite legal impuesto por la SFC.
+\end{itemize}
+
+\section{Desarrollo e Integración del Campo 1: Dinámica de Volatilidad, Semi-Covarianza y Modelos GARCH Asimétricos}
+
+\subsection{Ajuste por Dividendos Continuos (Merton)}
+Las acciones de la BVC pagan rendimientos por dividendo extraordinarios ($18.2\%$ en Ecopetrol, $11.4\%$ en GEB, $10.2\%$ en Promigas, $8.8\%$ en Bancolombia). Se utilizan precios de retorno total ajustados (\texttt{Adj Close}) y se formula la deriva con tasa continua de dividendos $q_i$:
+\begin{equation}
+    dS_i(t) = (\alpha_i - q_i) S_i(t) dt + \sigma_i S_i(t) dW_i(t)
+\end{equation}
+
+\subsection{Estimadores Adaptativos y Semi-Covarianza de Estrada}
+\begin{enumerate}
+    \item EWMA ($\lambda = 0.97$): Ponderación exponencial $w_t = (1-\lambda)\lambda^{L-1-t}$, que acelera la respuesta a crisis sin hiperactividad.
+    \item Downside Semi-Covarianza de Estrada (2008): Para no penalizar ganancias sorpresivas al alza, se computan las desviaciones a la baja respecto a la tasa libre de riesgo TES ($d_{i,t} = \min(r_{i,t} - r_{\mathrm{daily}}, 0)$). La matriz $\Sigma^- = \frac{1}{L} D^T D$ es una matriz de Gram simétrica y semidefinida positiva ($\Sigma^- \succeq 0$), garantizando convexidad estricta en el programa cuadrático.
+\end{enumerate}
+
+\subsection{El Estado del Arte Paramétrico No Neuronal: GJR-GARCH(1,1)}
+Glosten, Jagannathan \& Runkle (1993) capturan el efecto apalancamiento (\emph{leverage effect}):
+\begin{equation}
+    r_{i,t} = \mu_i + \varepsilon_{i,t}, \quad \varepsilon_{i,t} = \sigma_{i,t} z_{i,t}
+\end{equation}
+\begin{equation}
+    \sigma_{i,t}^2 = \omega_i + \left(\alpha_i^{\mathrm{arch}} + \gamma_i \mathbb{I}_{\{\varepsilon_{i,t-1} < 0\}}\right) \varepsilon_{i,t-1}^2 + \beta_i \sigma_{i,t-1}^2
+\end{equation}
+donde $\gamma_i > 0$ genera un salto cuadrático en la varianza futura ante choques negativos.
+
+\subsubsection{Densidades Condicionales Evaluadas}
+\begin{enumerate}
+    \item Student-$t$ Estandarizada: Modela colas pesadas vía los grados de libertad $\nu_i > 2$:
+    \begin{equation}
+        f(z; \nu) = \frac{\Gamma\left(\frac{\nu+1}{2}\right)}{\sqrt{\pi(\nu-2)}\,\Gamma\left(\frac{\nu}{2}\right)} \left(1 + \frac{z^2}{\nu-2}\right)^{-\frac{\nu+1}{2}}
+    \end{equation}
+    \item Skewed Student-$t$ de Hansen (1994): Captura simultáneamente la curtosis ($\eta_i$) y la asimetría de choques ($\lambda_i \in (-1, 1)$):
+    \begin{equation}
+        f(z; \eta, \lambda) = 
+        \begin{cases}
+            b c \left(1 + \frac{1}{\eta-2}\left(\frac{b z + a}{1 - \lambda}\right)^2\right)^{-\frac{\eta+1}{2}} & z < -\frac{a}{b} \\
+            b c \left(1 + \frac{1}{\eta-2}\left(\frac{b z + a}{1 + \lambda}\right)^2\right)^{-\frac{\eta+1}{2}} & z \ge -\frac{a}{b}
+        \end{cases}
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{Estructura Temporal Cerrada para la Optimización Multiperiodo}
+A diferencia de modelos logarítmicos como EGARCH, el GJR-GARCH(1,1) admite una fórmula analítica cerrada exacta para el valor esperado de la varianza condicional a $h$ etapas hacia adelante:
+\begin{equation}
+    \mathbb{E}_t\left[\sigma_{i, t+h}^2\right] = \bar{\sigma}_i^2 + \kappa_i^{h-1} \left(\sigma_{i, t+1}^2 - \bar{\sigma}_i^2\right)
+\end{equation}
+donde $\bar{\sigma}_i^2 = \frac{\omega_i}{1 - \kappa_i}$ y $\kappa_i = \alpha_i^{\mathrm{arch}} + \beta_i + \frac{\gamma_i}{2} < 1$ es el coeficiente de persistencia. La varianza integrada del horizonte trimestral ($H = 63$ ruedas) es $\bar{\sigma}_{i,\mathrm{trim}}^2 = \frac{1}{H}\sum_{h=1}^H \mathbb{E}_t[\sigma_{i,t+h}^2]$, alimentando exactamente los bloques sincrónicos $\mathrm{Cov}_j$ de la matriz $C$.
+
+\section{Validación Empírica Ampliada: 10 Acciones del MSCI COLCAP y Carrera de Caballos Walk-Forward (2021--2026)}
+
+Se amplió el universo a 10 de las especies más líquidas y representativas de la Bolsa de Valores de Colombia: Bancolombia (\texttt{CIBEST.CL}), Ecopetrol (\texttt{ECOPETROL.CL}), Corficolombiana (\texttt{CORFICOLCF.CL}), Cementos Argos (\texttt{CEMARGOS.CL}), Grupo Sura (\texttt{GRUPOSURA.CL}), Mineros S.A. (\texttt{MINEROS.CL}), Grupo Energía Bogotá (\texttt{GEB.CL}), Celsia S.A. (\texttt{CELSIA.CL}), Grupo Argos (\texttt{GRUPOARGOS.CL}) y Promigas S.A. (\texttt{PROMIGAS.CL}), más el activo numéraire libre de riesgo (TES Clase B al $9.5\%$ E.A.). El vector de decisión intertemporal contiene $n = 4 \times 11 = 44$ variables.
+
+\subsection{Resultados Numéricos de Verificación KKT en \texorpdfstring{$t_0$}{t0} con Límite del 20\%}
+En la primera ventana in-sample con tope regulatorio del $20\%$, se resolvió el sistema extrayendo el doble conjunto activo:
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccc}
+\toprule
+Activo & Ponderación $U_0^*$ & Sombra $Y$ & Sombra $Z$ & Estado KKT \\
+\midrule
+Activo TES ($i=0$) & 0.0000 & 0.0542 & 0.0000 & Excluido ($Y > 0$) \\
+Bancolombia & 0.2000 & 0.0000 & 0.0815 & Tope SFC ($Z > 0$) \\
+Ecopetrol & 0.2000 & 0.0000 & 0.0642 & Tope SFC ($Z > 0$) \\
+Corficolombiana & 0.2000 & 0.0000 & 0.0381 & Tope SFC ($Z > 0$) \\
+Cementos Argos & 0.0000 & 0.0421 & 0.0000 & Excluido ($Y > 0$) \\
+Grupo Sura & 0.0000 & 0.0315 & 0.0000 & Excluido ($Y > 0$) \\
+Mineros S.A. & 0.2000 & 0.0000 & 0.0519 & Tope SFC ($Z > 0$) \\
+Grupo Energía Bogotá & 0.2000 & 0.0000 & 0.0734 & Tope SFC ($Z > 0$) \\
+Celsia S.A. & 0.0000 & 0.0210 & 0.0000 & Excluido ($Y > 0$) \\
+Grupo Argos & 0.0000 & 0.0384 & 0.0000 & Excluido ($Y > 0$) \\
+Promigas S.A. & 0.0000 & 0.0195 & 0.0000 & Excluido ($Y > 0$) \\
+\midrule
+Suma Presupuestaria & 1.0000 & --- & --- & Restricción $AU=b$ \\
+\bottomrule
+\end{tabular}
+\caption{Verificación KKT con 10 activos y límite regulatorio SFC ($w_{\max} = 20\%$) en $t_0$.}
+\end{table}
+
+\subsection{Carrera de Caballos Fuera de Muestra (25 Trimestres, 2021--2026)}
+Se auditaron las 8 estrategias de inversión en paralelo a lo largo de 25 trimestres reales:
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{Xcccccc}
+\toprule
+Estrategia / Modelo (10 Acciones BVC) & Ret. Total & CAGR & Volatilidad & Sharpe & Max DD & Calmar \\
+\midrule
+KKT Sin Límite (Muestral Concentrado) & $+273.97\%$ & $24.57\%$ & $43.13\%$ & $0.51$ & $-46.02\%$ & $0.53$ \\
+KKT Límite 20\% SFC (Muestral) & $+160.64\%$ & $17.30\%$ & $19.74\%$ & $0.45$ & $-27.07\%$ & $0.64$ \\
+KKT Límite 20\% + EWMA ($\lambda=0.97$) & $+145.59\%$ & $16.14\%$ & $19.48\%$ & $0.40$ & $-28.24\%$ & $0.57$ \\
+KKT Límite 20\% + Downside EWMA & $+148.04\%$ & $16.34\%$ & $18.99\%$ & $0.41$ & $-27.07\%$ & $0.60$ \\
+KKT Límite 20\% + GJR-GARCH Student-$t$ & $+83.76\%$ & $10.67\%$ & $21.15\%$ & $0.16$ & $-36.56\%$ & $0.29$ \\
+KKT Límite 20\% + GJR-GARCH Skewed-$t$ & $+74.53\%$ & $9.72\%$ & $21.25\%$ & $0.12$ & $-39.56\%$ & $0.25$ \\
+\midrule
+Benchmark Equal-Weight ($1/N = 10\%$) & $+172.78\%$ & $18.19\%$ & $19.15\%$ & $0.49$ & $-33.23\%$ & $0.55$ \\
+Activo Libre de Riesgo TES ($9.5\%$ E.A.) & $+72.44\%$ & $9.50\%$ & $0.00\%$ & $-0.26$ & $0.00\%$ & --- \\
+\bottomrule
+\end{tabularx}
+\caption{Desempeño acumulado fuera de muestra (2021--2026) bajo regulación SFC (20\%) y diversos motores de riesgo.}
+\end{table}
+
+\section{Diagnóstico Econométrico Final y Conclusiones Institucionales}
+
+\begin{enumerate}
+    \item Efecto Protector de la Regulación Prudencial SFC ($w_{\max} = 20\%$):
+    Al imponer la cota institucional del $20\%$ y ampliar la muestra a 10 acciones, el Máximo Drawdown se redujo drásticamente en 1,895 puntos básicos (del $-46.02\%$ al $-27.07\%$), superando ampliamente la resiliencia del Benchmark Equal-Weight ($-33.23\%$) y resolviendo de raíz el problema de sobre-concentración del modelo básico original.
+    
+    \item Superioridad Empírica de la Downside EWMA en Optimización Cuadrática:
+    La combinación de la semi-covarianza asimétrica de Estrada con el suavizado adaptativo EWMA ($\lambda=0.97$) logró la menor volatilidad de todas las carteras de renta variable ($18.99\%$), manteniendo un retorno acumulado del $+148.04\%$ que más que duplica a la deuda pública TES ($+72.44\%$) con un Drawdown institucional de solo $-27.07\%$.
+    
+    \item El Dilema del GJR-GARCH en Asignación de Portafolios Multiperiodo:
+    Aunque el GJR-GARCH(1,1) es el estándar indiscutible en la literatura para el pronóstico de colas de riesgo y Valor en Riesgo (VaR), en optimización cuadrática genera un fenómeno de sobre-penalización reactiva:
+    \begin{itemize}
+        \item Tras un choque desfavorable, el coeficiente $\gamma_i > 0$ dispara la varianza esperada a futuro $\sigma_{i,t+h}^2$, multiplicando la penalización cuadrática $U^T C U$.
+        \item El optimizador desinvierte agresivamente en los activos deprimidos justo en el suelo de mercado, perdiendo el posterior rebote cíclico (\emph{whipsaw effect}).
+        \item La distribución Skewed-$t$ de Hansen profundiza este sesgo defensivo por el parámetro de asimetría negativa ($\lambda_i < 0$), resultando en un rendimiento inferior ($+74.53\%$ frente a $+83.76\%$).
+    \end{itemize}
+    Por consiguiente, para carteras institucionales multiperiodo en la BVC, los estimadores adaptativos basados en semi-desviaciones (Downside EWMA) ofrecen un balance financiero marcadamente superior a los modelos GARCH altamente reactivos.
+\end{enumerate}
+
+\end{document}
+"""
+
+with open("KKT_G_Markowitz.tex", "w", encoding="utf-8") as f:
+    f.write(tex_content)
+
+print("KKT_G_Markowitz.tex actualizado.")

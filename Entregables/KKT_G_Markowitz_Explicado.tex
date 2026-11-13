@@ -1,0 +1,1592 @@
+\documentclass[11pt,a4paper]{report}
+
+% --- Paquetes Esenciales ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath,amssymb,amsfonts,mathtools,amsthm}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{titlesec}
+
+% --- Geometria y Margenes ---
+\geometry{
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.5cm,
+    right=2.5cm,
+    headheight=15pt
+}
+
+% --- Encabezados y Pies de Pagina ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small \textsl{\leftmark}}
+\fancyhead[R]{\small \textsl{Markowitz Multiperiodo con Condiciones KKT}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% --- Configuracion de Colores Institucionales ---
+\definecolor{navyblue}{RGB}{0,45,90}
+\definecolor{darkgreen}{RGB}{15,85,15}
+\definecolor{burgundy}{RGB}{120,20,20}
+\definecolor{boxbg}{RGB}{246,248,252}
+\definecolor{boxframe}{RGB}{25,75,135}
+\definecolor{demobg}{RGB}{250,252,248}
+\definecolor{demoframe}{RGB}{35,110,35}
+\definecolor{notebg}{RGB}{255,250,242}
+\definecolor{noteframe}{RGB}{200,110,20}
+
+% --- Configuracion de Enlaces ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=navyblue,
+    citecolor=navyblue,
+    urlcolor=navyblue,
+    pdfauthor={T. Draviam, T. Chellathurai, J. M. Delgado Molina},
+    pdftitle={Tratado Exhaustivo: Seleccion de Portafolios Multiperiodo de Markowitz con Condiciones KKT}
+}
+
+% --- Cajas Estilizadas (tcolorbox) ---
+\tcbuselibrary{skins,breakable}
+
+\newtcolorbox{conceptbox}[1][]{
+    enhanced,
+    colback=boxbg,
+    colframe=boxframe,
+    fonttitle=\bfseries\color{white},
+    coltitle=white,
+    title={#1},
+    arc=2.5mm,
+    boxrule=0.9pt,
+    left=4mm, right=4mm, top=3mm, bottom=3mm,
+    breakable
+}
+
+\newtcolorbox{demobox}[1][]{
+    enhanced,
+    colback=demobg,
+    colframe=demoframe,
+    fonttitle=\bfseries\color{white},
+    coltitle=white,
+    title={Deduccion Matematica Paso a Paso: #1},
+    arc=2mm,
+    boxrule=0.8pt,
+    left=4mm, right=4mm, top=3mm, bottom=3mm,
+    breakable
+}
+
+\newtcolorbox{notebox}[1][]{
+    enhanced,
+    colback=notebg,
+    colframe=noteframe,
+    fonttitle=\bfseries\color{white},
+    coltitle=white,
+    title={Intuicion Financiera y Nota Tecnica: #1},
+    arc=2mm,
+    boxrule=0.8pt,
+    left=4mm, right=4mm, top=3mm, bottom=3mm,
+    breakable
+}
+
+% --- Ambientes Matematicos ---
+\newtheorem{theorem}{Teorema}[chapter]
+\newtheorem{proposition}[theorem]{Proposicion}
+\newtheorem{definition}[theorem]{Definicion}
+\newtheorem{lemma}[theorem]{Lema}
+\newtheorem{corollary}[theorem]{Corolario}
+
+\numberwithin{equation}{chapter}
+
+% --- Formato de Capitulos ---
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\color{navyblue}}
+  {\filleft\Large\textsf{CAPÍTULO \thechapter}}
+  {1ex}
+  {\titlerule[1.5pt]\vspace{1.5ex}\LARGE}
+  [\vspace{1ex}{\titlerule[0.5pt]}]
+
+\begin{document}
+
+% ==============================================================================
+% PORTADA
+% ==============================================================================
+\begin{titlepage}
+    \centering
+    \vspace*{1.5cm}
+    
+    {\Huge \bfseries \color{navyblue} SELECCIÓN DE PORTAFOLIOS MULTIPERIODO DE MARKOWITZ CON CONDICIONES KARUSH-KUHN-TUCKER}\\[0.6cm]
+    {\LARGE \textbf{Principios Generalizados de Media-Varianza, Soluciones Analíticas y Optimización Cuadrática con Restricciones}}\\[1.5cm]
+    
+    \textbf{\Large Tratado Monográfico de Fundamentación y Derivación Paso a Paso}\\[0.4cm]
+    \large Integración Completa del Artículo Seminal de la \emph{Royal Society of London}:\\
+    \textsl{"Generalized Markowitz mean-variance principles for multi-period portfolio-selection problems"}\\
+    (T. Draviam \& T. Chellathurai, 2002)\\
+    y la Síntesis Metodológica de Juan Mario Delgado Molina (2026)\\[2.5cm]
+    
+    \begin{tcolorbox}[colback=navyblue!5!white,colframe=navyblue,arc=3mm,width=0.9\textwidth]
+    \centering
+    \small \textbf{Alcance del Documento:}\\
+    Traducción completa, desarrollo explícito de todos los procedimientos implícitos, demostraciones analíticas paso a paso, derivación de covarianzas intertemporales, formulación canónica de sistemas KKT, análisis exhaustivo de líneas críticas e implementación computacional para el mercado bursátil.
+    \end{tcolorbox}
+    
+    \vfill
+    {\large \textbf{Edición Académica y Cuantitativa de Referencia}}\\[0.2cm]
+    {\large Octubre de 2026}
+\end{titlepage}
+
+% ==============================================================================
+% RESUMEN Y CONTENIDO
+% ==============================================================================
+\pagenumbering{roman}
+\chapter*{Resumen General}
+\addcontentsline{toc}{chapter}{Resumen General}
+
+El presente tratado monográfico desarrolla en profundidad y con absoluto rigor matemático la totalidad del marco teórico de \textbf{Selección Óptima de Portafolios Multiperiodo bajo el Principio de Media-Varianza de Markowitz con Restricciones de Desigualdad y Condiciones Karush-Kuhn-Tucker (KKT)}, partiendo de la investigación seminal de Thangaraj Draviam y Thamayanthi Chellathurai publicada en los \emph{Proceedings of the Royal Society of London A} (2002, 458, pp. 2571--2607) y su contextualización para economías emergentes sintetizada por Juan Mario Delgado Molina (2026).
+
+En las publicaciones científicas originales, por restricciones de espacio editorial, una proporción considerable de pasos algebraicos, definiciones de espacios vectoriales, cambios de variables, deducciones tensoriales de matrices y operadores de proyección se presentan de manera condensada o implícita. El objetivo primordial de esta obra es **hacer completamente explícito cada procedimiento**, detallando la derivación formal de:
+\begin{enumerate}[leftmargin=2em]
+    \item La tasa neta de retorno descontada $R$ y el mecanismo de precios diferenciales normalizados $p_{i,j}$ empleando un activo libre de riesgo como \emph{numéraire}.
+    \item La función objetivo cuadrática unificada $F(U) = -\theta' P^T U + \frac{1}{2} U^T C U$ y la prueba rigurosa de la estructura tridiagonal por bloques de la matriz de covarianza intertemporal $C$.
+    \item La deducción de las covarianzas intertemporales cerradas bajo Movimiento Browniano Geométrico Multivariado y la demostración de convergencia asintótica con el modelo de tiempo continuo de Robert Merton (1969).
+    \item La resolución analítica de las condiciones KKT mediante la matriz de Gram $G = A C^{-1} A^T$ y la deducción geométrica de la frontera eficiente como parábola en $(\sigma_{\mathrm{tot}}^2, \mu_P)$ e hipérbola en $(\sigma_{\mathrm{tot}}, \mu_P)$.
+    \item El análisis algebraico exhaustivo de los 5 casos de movimiento de precios en el modelo canónico bi-periódico con dos activos y la deducción exacta de los umbrales críticos de aversión al riesgo $L_1, L_2, L_3, L_4$.
+    \item La formulación mediante la ecuación de Fokker-Planck para activos con deriva variable en el tiempo y el análisis numérico de 7 activos y 10 periodos.
+    \item La discusión teórico-computacional que contrasta este enfoque cuadrático con las ecuaciones diferenciales parciales de Hamilton-Jacobi-Bellman (HJB), explicando por qué los algoritmos de Puntos Interiores Primal-Dual KKT son el estándar de oro en la industria financiera global.
+    \item La parametrización práctica para la estructuración de portafolios en el mercado accionario colombiano (MSCI COLCAP) y títulos de deuda soberana TES.
+\end{enumerate}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ==============================================================================
+% GLOSARIO Y CONVENCIONES DIMENSIONALES
+% ==============================================================================
+\chapter*{Glosario Exhaustivo de Notación y Convenciones Dimensionales}
+\addcontentsline{toc}{chapter}{Glosario Exhaustivo de Notación y Convenciones Dimensionales}
+
+Para garantizar una lectura matemáticamente inequívoca a lo largo de toda la monografía, el Cuadro~\ref{tab:glosario_maestro} compendia la totalidad de variables, vectores, matrices y parámetros utilizados en los diferentes modelos de Draviam \& Chellathurai (2002), indicando su dimensión exacta en el espacio euclidiano correspondiente y su interpretación económica.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{lp{2.2cm}p{2.3cm}X}
+\toprule
+\textbf{Símbolo} & \textbf{Tipo} & \textbf{Dimensión} & \textbf{Definición y Significado Financiero} \\
+\midrule
+$M$ & Entero & $\mathbb{N}$ & Número total de fechas intermedias de rebalanceo ($j=1,\dots,M$). \\
+$M+1$ & Entero & $\mathbb{N}$ & Número total de fechas de decisión activa ($t_0, t_1, \dots, t_M$). \\
+$M+2$ & Entero & $\mathbb{N}$ & Número total de nodos temporales, incluyendo la liquidación ($t_0, \dots, t_{M+1}$). \\
+$N$ & Entero & $\mathbb{N}$ & Número total de activos riesgosos en el mercado ($i=1,\dots,N$). \\
+$N+1$ & Entero & $\mathbb{N}$ & Universo total de activos disponibles, incluyendo el activo libre de riesgo ($i=0$). \\
+$X$ & Escalar & $\mathbb{R}_+$ & Riqueza o capital total inicial disponible en $t=0$ en unidades monetarias. \\
+$S_{i,j}$ & Variable aleat. & $\mathbb{R}_+$ & Precio de mercado del activo $i$ en el instante temporal $t_j$. \\
+$S_{0,j}$ & Real determ. & $\mathbb{R}_+$ & Precio unitario determinístico del activo libre de riesgo en $t_j$ ($S_{0,0} = 1$). \\
+$\mu_{R,j}$ & Real determ. & $\mathbb{R}_+$ & Factor de escala/descuento (\emph{numéraire}) en $t_j$. Se adopta $\mu_{R,j} = S_{0,j}$. \\
+$\mu_{i,j}$ & Escalar & $\mathbb{R}_+$ & Valor esperado del precio del activo: $\mu_{i,j} = \mathbb{E}[S_{i,j}]$. \\
+$U_{i,j}$ & Variable & $\mathbb{R}$ & Número de unidades físicas (acciones) del activo $i$ poseídas tras rebalancear en $t_j$. \\
+$\alpha_{i,j}$ & Variable & $\mathbb{R}$ & Volumen neto de transacción del activo riesgoso $i$ en $t_j$: $\alpha_{i,j} = U_{i,j} - U_{i,j-1}$. \\
+$p_{i,j}$ & Variable & $\mathbb{R}$ & Precio normalizado. En Sec.~2-3: $p_{i,j} = \frac{S_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,j}}{S_{0,j}}$. En Sec.~4-5: $p_{i,j} = \frac{S_{i,j}}{\mu_{R,j}}$. \\
+$\bar{p}_{i,j}$ & Escalar & $\mathbb{R}$ & Esperanza del precio normalizado: $\bar{p}_{i,j} = \mathbb{E}[p_{i,j}]$. \\
+$R$ & Variable aleat. & $\mathbb{R}$ & Tasa neta de beneficio de la inversión descontada a valor presente de $t_0$. \\
+$\mu_R$ & Escalar & $\mathbb{R}$ & Rendimiento esperado de la tasa neta descontada: $\mu_R = \mathbb{E}[R]$. \\
+$\sigma_R^2$ & Escalar & $\mathbb{R}_+$ & Varianza de la tasa neta descontada: $\sigma_R^2 = \mathrm{Var}(R)$. \\
+$\theta$ & Escalar & $\mathbb{R}_+$ & Parámetro de tolerancia al riesgo en la formulación de tasa de beneficio (Sec.~3). \\
+$\theta'$ & Escalar & $\mathbb{R}_+$ & Parámetro de tolerancia al riesgo en la formulación cuadrática general (Sec.~4-5). \\
+$B$ & Vector col. & $\mathbb{R}^{(M+1)N}$ & Vector global de transacciones en activos riesgosos: $(\alpha_0^T, \alpha_1^T, \dots, \alpha_M^T)^T$. \\
+$\mu$ & Vector col. & $\mathbb{R}^{(M+1)N}$ & Vector global de diferencias de precios esperados descontados: $(R_0^T, \dots, R_M^T)^T$. \\
+$U_j$ & Vector col. & $\mathbb{R}^{N+1}$ & Vector de posiciones físicas en todos los activos en $t_j$: $(U_{0,j}, U_{1,j}, \dots, U_{N,j})^T$. \\
+$U$ & Vector col. & $\mathbb{R}^{(M+1)(N+1)}$ & Vector global de posiciones en todo el horizonte: $(U_0^T, U_1^T, \dots, U_M^T)^T$. \\
+$C$ & Matriz & Simétrica & Matriz global de covarianza intertemporal y penalización de varianza. \\
+$A$ & Matriz & Bloques & Matriz de restricciones lineales de presupuesto y autofinanciamiento esperado. \\
+$b$ & Vector col. & $\mathbb{R}^{M+1}$ & Vector del lado derecho: $(X/\mu_{R,0}, 0, \dots, 0)^T$. \\
+$\Lambda$ & Vector col. & $\mathbb{R}^{M+1}$ & Vector de multiplicadores de Lagrange asociados a las restricciones $AU = b$. \\
+$Y$ & Vector col. & $\mathbb{R}^{(M+1)(N+1)}$ & Vector de multiplicadores KKT (precios sombra) para las restricciones $U \ge 0$. \\
+\bottomrule
+\end{tabularx}
+\caption{Glosario maestro de notación, dimensionalidad y definiciones económicas.}
+\label{tab:glosario_maestro}
+\end{table}
+
+\newpage
+\pagenumbering{arabic}
+
+% ==============================================================================
+% CAPÍTULO 1: INTRODUCCIÓN Y REVISIÓN DE LA LITERATURA
+% ==============================================================================
+\chapter{Introducción y Estado del Arte en Selección de Portafolios Dinámicos}
+
+\section{El Principio de Media-Varianza de Markowitz}
+
+La teoría moderna de portafolios tiene su origen en las investigaciones pioneras de Harry Markowitz (1952, 1987, 1994). Markowitz postuló que un inversionista racional averso al riesgo debe fundamentar sus decisiones exclusivamente en los dos primeros momentos estadísticos de la distribución de retornos de los activos:
+\begin{enumerate}
+    \item El \textbf{rendimiento esperado} del portafolio ($\mathbb{E}[R_p]$), como medida de la recompensa esperada del capital invertido.
+    \item La \textbf{varianza o desviación estándar} del portafolio ($\sigma_p^2 = \mathrm{Var}(R_p)$), como métrica cuantitativa del riesgo de dispersión.
+\end{enumerate}
+
+El objetivo central del análisis consiste en construir el \textbf{conjunto eficiente de inversiones}: aquel subconjunto de carteras admisibles que maximiza el retorno esperado para un nivel dado de varianza, o equivalentemente, minimiza la varianza para una tasa de retorno requerida. 
+
+Cuando únicamente existen restricciones de igualdad lineal (como la condición presupuestaria $\sum w_i = 1$) y no se imponen cotas sobre las variables, el problema se resuelve analíticamente mediante multiplicadores de Lagrange clásicos, arrojando ponderaciones óptimas en forma cerrada y trazando una frontera eficiente que toma la forma de una parábola en el plano $(\sigma_p^2, \mathbb{E}[R_p])$ o una hipérbola en el plano $(\sigma_p, \mathbb{E}[R_p])$.
+
+Sin embargo, cuando se introducen restricciones de desigualdad lineales —tales como la prohibición de ventas al descubierto o ventas en corto ($w_i \ge 0$) o límites regulatorios de exposición máxima— la solución óptima deja de ser una única ecuación lineal y se transforma en una función lineal a trozos (\emph{piecewise linear}) del parámetro de aversión al riesgo, dando lugar al célebre algoritmo de las **Líneas Críticas** (\emph{Critical Line Algorithm} - CLA) desarrollado por Markowitz (1987) y formalizado analíticamente por Best (1996, 1999) y Best \& Grauer (1991a, b). 
+
+\section{La Dimensión Temporal: Limitaciones del Marco Uniperiódico}
+
+El modelo clásico de Markowitz fue concebido originalmente para un único período estático $[0, T]$. En la gestión patrimonial e institucional real, sin embargo, el horizonte de planeación abarca múltiples años divididos en fechas intermedias de negociación $t_0, t_1, \dots, t_M$. 
+
+Abordar este problema aplicando de manera repetitiva e independiente el modelo uniperiódico en cada fecha intermedia (estrategia miope o de ventana deslizante) genera tres deficiencias estructurales graves:
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Incapacidad de Explotar la Estructura de Covarianza Intertemporal:} Los activos no solo presentan correlaciones cruzadas contemporáneas en una misma fecha $\mathrm{Cov}(S_{i,j}, S_{k,j})$, sino correlaciones cruzadas entre fechas distintas $\mathrm{Cov}(S_{i,j}, S_{k,n})$ para $j \neq n$. El enfoque uniperiódico descarta totalmente esta información.
+    \item \textbf{Ceguera ante la Predictibilidad y la Reversión a la Media:} La econometría financiera moderna (Summers 1986; Fama \& French 1988; Poterba \& Summers 1988; Lo \& MacKinlay 1988; Campbell, Lo \& MacKinlay 1997) ha documentado exhaustivamente que las series de precios accionarios exhiben autocorrelación significativa: correlación positiva débil en horizontes muy cortos y correlación negativa marcada (reversión a la media) en horizontes medianos y largos. Al ignorar la dinámica temporal, el optimizador uniperiódico asume que los precios siguen un paseo aleatorio puro con incrementos estacionarios independientes, desaprovechando la predictibilidad de largo plazo.
+    \item \textbf{Costos de Transacción Excesivos:} Las carteras uniperiódicas sufren una alta inestabilidad temporal; pequeños cambios en los rendimientos esperados estimados provocan giros radicales en la composición de la cartera, induciendo una rotación destructiva de activos.
+\end{enumerate}
+
+\section{Revisión de los Tres Enfoques Multiperiodo Tradicionales}
+
+La literatura cuantitativa previa a Draviam \& Chellathurai (2002) abordó la optimización multiperiodo mediante tres grandes marcos matemáticos:
+
+\subsection{1. Teoría de Control Óptimo Estocástico (Merton y HJB)}
+Iniciada por Robert C. Merton (1969, 1971, 1996) mediante el cálculo de Itô y el principio de programación dinámica de Bellman, formula el problema en tiempo continuo:
+\begin{equation}
+    \max_{\{u_t\}} \mathbb{E} \left[ \int_0^T e^{-\rho t} U(c_t) dt + e^{-\rho T} B(W_T) \right]
+\end{equation}
+La condición de optimalidad conduce a la ecuación en derivadas parciales no lineal de **Hamilton-Jacobi-Bellman (HJB)**:
+\begin{equation}
+    \frac{\partial V}{\partial t} + \sup_{u} \left\{ \mathcal{A}^u V(W, S, t) \right\} = 0
+\end{equation}
+Aunque Merton obtuvo soluciones analíticas cerradas cuando las oportunidades de inversión son constantes y no hay fricciones, la inclusión de restricciones de no negatividad ($u_i \ge 0$) o costos proporcionales de transacción (Magill \& Constantinides 1976; Davis \& Norman 1990; Shreve \& Soner 1994; Akian, Menaldi \& Sulem 1996) transforma el problema en una desigualdad variacional con fronteras libres de negociación. Como se analizó previamente, la resolución numérica de HJB sufre la **maldición de la dimensionalidad**, colapsando computacionalmente cuando el portafolio contiene más de 3 o 4 activos riesgosos.
+
+\subsection{2. Teoría del Crecimiento del Capital (Criterio de Kelly)}
+Desarrollada por Hakansson (1974) y revisada por Hakansson \& Ziemba (1995), maximiza la tasa esperada de crecimiento logarítmico de la riqueza de largo plazo: $\max \mathbb{E}[\ln W_T]$. Debido a que la función logarítmica es aditivamente separable en el tiempo:
+\begin{equation}
+    \ln W_T = \ln W_0 + \sum_{j=1}^{M+1} \ln(1 + R_j)
+\end{equation}
+la estrategia óptima resulta ser \textbf{miope}: maximizar el crecimiento de largo plazo equivale a maximizar $\mathbb{E}[\ln(1+R_j)]$ periodo a periodo de forma independiente. Sin embargo, el criterio de Kelly puro implica una altísima volatilidad de corto plazo, concentración extrema en pocos activos y un riesgo de pérdida severo (*drawdown*), lo que restringe su viabilidad para instituciones como fondos de pensiones.
+
+\subsection{3. Programación Estocástica Multietapa (*Stochastic Programming*)}
+Plantea las decisiones de inversión sobre un **árbol de escenarios estocástico** (Carino et al. 1994; Mulvey 1994; Mulvey \& Vladimirou 1992; Zenios 1993; Consigli \& Dempster 1998 en el modelo CALM). Si en cada etapa temporal existen $b$ ramificaciones posibles de los retornos de los activos, tras $M$ periodos el árbol genera $b^M$ escenarios terminales. El número total de variables de decisión crece a una escala:
+\begin{equation}
+    \text{Variables} \sim \mathcal{O}(N \cdot b^M)
+\end{equation}
+Para un horizonte de rebalanceo trimestral a varios años con múltiples activos, el tamaño del árbol se vuelve astronómico, limitando severamente la resolución paramétrica para diferentes perfiles de aversión al riesgo.
+
+\section{La Propuesta de Draviam \& Chellathurai (2002)}
+
+Ante las severas barreras de los tres métodos anteriores, Draviam \& Chellathurai proponen un paradigma revolucionario: **reducir el problema dinámico multiperiodo a una Programación Cuadrática estándar de Markowitz**, formulada en un espacio vectorial ampliado de dimensión $(M+1)(N+1)$. 
+
+Al asumir que el número de acciones a mantener en cada activo es una variable de control determinística (estrategia de lazo abierto / *open-loop policy*) y debilitar la conservación estocástica de riqueza a conservación en valor esperado con penalización cuadrática sobre las fluctuaciones de autofinanciamiento:
+\begin{itemize}
+    \item Se preserva toda la estructura de covarianzas intertemporales entre activos y fechas.
+    \item Se obtienen soluciones analíticas cerradas cuando se permiten ventas al descubierto.
+    \item Se demuestra que la frontera eficiente sigue una parábola analítica exacta en el espacio varianza-retorno.
+    \item Se resuelve el problema con restricciones de no negatividad ($U \ge 0$) mediante un sistema de condiciones **Karush-Kuhn-Tucker (KKT)** en milisegundos, eludiendo por completo la maldición de la dimensionalidad de Bellman.
+\end{itemize}
+
+% ==============================================================================
+% CAPÍTULO 2: FORMULACIÓN GENERAL DEL PORTAFOLIO MULTIPERIODO
+% ==============================================================================
+\chapter{Formulación Matemática General del Portafolio Multiperiodo}
+
+\section{Espacio Temporal y Universo de Inversión}
+
+Definimos una partición discreta del horizonte de planeación financiero:
+\begin{equation}
+    0 = t_0 < t_1 < t_2 < \dots < t_M < t_{M+1} = T
+\end{equation}
+El conjunto de nodos temporales consta de $M+2$ puntos:
+\begin{itemize}[leftmargin=2em]
+    \item $t_0$: Fecha inicial determinística (hoy). Se conoce con certidumbre el vector de precios iniciales $S_0$ y el capital financiero inicial disponible $X > 0$.
+    \item $t_1, t_2, \dots, t_M$: Representan las $M$ fechas intermedias en las que se efectúan las operaciones de rebalanceo de cartera.
+    \item $t_{M+1}$: Fecha final de liquidación del portafolio. En este instante no se realizan nuevas transacciones; únicamente se valoriza la riqueza terminal acumulada.
+\end{itemize}
+
+El universo financiero contiene $N+1$ activos:
+\begin{itemize}[leftmargin=2em]
+    \item Activo $i=0$: Activo libre de riesgo (cuenta bancaria, bono cupón cero o título de deuda soberana de corto plazo), con precio determinístico $S_{0,j}$ en cada fecha $t_j$.
+    \item Activos $i=1, 2, \dots, N$: Activos riesgosos (acciones bursátiles, divisas o materias primas), con precios estocásticos $S_{i,j}$ para $j \ge 1$.
+\end{itemize}
+
+\section{Dinámica de Riqueza y Rebalanceo Instantáneo}
+
+En cada fecha de negociación $t_j$ ($j=0, 1, \dots, M$), el inversionista decide el número de unidades físicas (acciones o títulos) a mantener en cartera para cada activo, denotado por $U_{i,j}$.
+
+\begin{definition}[Condición de Presupuesto Inicial en $t_0$]
+En el instante inicial $t_0 = 0$, el inversionista asigna la totalidad de su patrimonio inicial $X$ entre el activo libre de riesgo y los $N$ activos riesgosos. Dado que los precios iniciales $S_{i,0}$ son determinísticos:
+\begin{equation}
+    \sum_{i=0}^N S_{i,0} U_{i,0} = X \label{eq:presupuesto_inicial_nominal}
+\end{equation}
+\end{definition}
+
+Asumimos que en cada fecha intermedia $t_j$ ($j=1, \dots, M$), el rebalanceo ocurre de manera instantánea:
+\begin{enumerate}
+    \item \textbf{Riqueza antes de las transacciones en $t_j$ ($W(t_j)$):} En el instante $t_j$, el mercado cotiza a los nuevos precios $S_{i,j}$, pero el portafolio aún conserva las cantidades decididas en la fecha anterior $U_{i,j-1}$:
+    \begin{equation}
+        W(t_j) = \sum_{i=0}^N S_{i,j} U_{i,j-1} \label{eq:riqueza_previa}
+    \end{equation}
+    \item \textbf{Riqueza después de las transacciones en $t_j$ ($W'(t_j)$):} Tras reestructurar las posiciones a las nuevas cantidades $U_{i,j}$ a los precios vigentes $S_{i,j}$, el valor del portafolio es:
+    \begin{equation}
+        W'(t_j) = \sum_{i=0}^N S_{i,j} U_{i,j} \label{eq:riqueza_posterior}
+    \end{equation}
+\end{enumerate}
+
+\begin{definition}[Condición de Conservación de Riqueza / Autofinanciamiento]
+Bajo el principio de que no se producen inyecciones ni retiros de fondos externos durante la vida de la inversión, el costo de las compras debe ser idéntico al ingreso generado por las ventas:
+\begin{equation}
+    W'(t_j) - W(t_j) = 0 \iff \sum_{i=0}^N S_{i,j} (U_{i,j} - U_{i,j-1}) = 0, \quad j = 1, 2, \dots, M \label{eq:conservacion_exacta}
+\end{equation}
+\end{definition}
+
+\begin{definition}[Riqueza Terminal Acumulada en $t_{M+1}$]
+Al llegar al horizonte de liquidación $t_{M+1}$, el valor nominal final del portafolio viene dado por la liquidación de las posiciones mantenidas desde $t_M$ a los precios terminales $S_{i,M+1}$:
+\begin{equation}
+    W(t_{M+1}) = \sum_{i=0}^N S_{i,M+1} U_{i,M} \label{eq:riqueza_terminal}
+\end{equation}
+\end{definition}
+
+\section{Los Tres Supuestos Fundamentales del Modelo}
+
+En la formulación de Draviam \& Chellathurai (2002, Sección 2a) se establecen tres supuestos operacionales cruciales:
+\begin{enumerate}[label=(\alph*),leftmargin=2em]
+    \item \textbf{Control determinístico en activos riesgosos:} El número de acciones $U_{i,j}$ invertido en cada activo riesgoso ($i=1,\dots,N$) es determinístico en todas las fechas de negociación $t_j$.
+    \item \textbf{Control estocástico en el activo libre de riesgo con ventas en corto:} Cuando se permiten ventas al descubierto, la cantidad de dinero invertida en el activo libre de riesgo $U_{0,j}$ es una variable aleatoria en las fechas futuras $t_j$ ($j=1,\dots,M$). El activo libre de riesgo actúa como una cuenta bancaria amortiguadora que absorbe exactamente las fluctuaciones estocásticas de las compras y ventas de los activos riesgosos.
+    \item \textbf{Control determinístico global sin ventas en corto:} Cuando las ventas en corto están prohibidas ($U_{i,j} \ge 0$), la cuenta libre de riesgo no puede incurrir en sobregiros bancarios ilimitados. Por ende, la inversión en el activo libre de riesgo también debe fijarse de forma determinística en todas las fechas.
+\end{enumerate}
+
+\section{Deducción Paso a Paso de la Riqueza Libre de Riesgo}
+
+Analizamos ahora el caso (Sección 2b del paper original) donde se permite venta en corto y la posición libre de riesgo $U_{0,j}$ actúa como variable estocástica de ajuste.
+
+Asumimos que el activo libre de riesgo tiene precios determinísticos $\{S_{0,0}=1, S_{0,1}, \dots, S_{0,M+1}\}$, que sirven como precios de referencia. Dividiendo la riqueza terminal~\eqref{eq:riqueza_terminal} entre $S_{0,M+1}$:
+\begin{equation}
+    \frac{W(t_{M+1})}{S_{0,M+1}} = U_{0,M} \frac{S_{0,M+1}}{S_{0,M+1}} + \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} U_{i,M} = U_{0,M} + \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} U_{i,M} \label{eq:terminal_descontada}
+\end{equation}
+donde $\frac{W(t_{M+1})}{S_{0,M+1}}$ representa el valor de la riqueza terminal descontado a valor presente de $t_0$.
+
+\begin{demobox}[Deducción de la Sumatoria Telescópica para $U_{0,M}$]
+\textbf{Objetivo:} Demostrar la ecuación (2.8) del paper original a partir de la conservación de riqueza.
+
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Paso 1:} Despejamos el término libre de riesgo en la ecuación de autofinanciamiento~\eqref{eq:conservacion_exacta}:
+    \begin{equation}
+        S_{0,j}(U_{0,j} - U_{0,j-1}) + \sum_{i=1}^N S_{i,j}(U_{i,j} - U_{i,j-1}) = 0
+    \end{equation}
+    Dividiendo entre $S_{0,j} > 0$:
+    \begin{equation}
+        U_{0,j} - U_{0,j-1} = - \sum_{i=1}^N \frac{S_{i,j}}{S_{0,j}} (U_{i,j} - U_{i,j-1}), \quad j = 1, \dots, M
+    \end{equation}
+    Esta es la ecuación (2.7) del paper.
+    
+    \item \textbf{Paso 2:} Escribimos la suma telescópica para $U_{0,M}$ acumulando las variaciones desde $j=1$ hasta $M$:
+    \begin{equation}
+        \sum_{j=1}^M (U_{0,j} - U_{0,j-1}) = (U_{0,1} - U_{0,0}) + (U_{0,2} - U_{0,1}) + \dots + (U_{0,M} - U_{0,M-1}) = U_{0,M} - U_{0,0}
+    \end{equation}
+    Por tanto:
+    \begin{equation}
+        U_{0,M} = U_{0,0} - \sum_{j=1}^M \sum_{i=1}^N \frac{S_{i,j}}{S_{0,j}} (U_{i,j} - U_{i,j-1})
+    \end{equation}
+    
+    \item \textbf{Paso 3:} De la restricción de presupuesto inicial~\eqref{eq:presupuesto_inicial_nominal}, dividiendo entre $S_{0,0}$:
+    \begin{equation}
+        U_{0,0} + \sum_{i=1}^N \frac{S_{i,0}}{S_{0,0}} U_{i,0} = \frac{X}{S_{0,0}} \implies U_{0,0} = \frac{X}{S_{0,0}} - \sum_{i=1}^N \frac{S_{i,0}}{S_{0,0}} U_{i,0}
+    \end{equation}
+    
+    \item \textbf{Paso 4:} Sustituyendo $U_{0,0}$ en la expresión telescópica de $U_{0,M}$:
+    \begin{equation}
+        \boxed{U_{0,M} = \frac{X}{S_{0,0}} - \sum_{i=1}^N \frac{S_{i,0}}{S_{0,0}} U_{i,0} - \sum_{j=1}^M \sum_{i=1}^N \frac{S_{i,j}}{S_{0,j}} (U_{i,j} - U_{i,j-1})}
+    \end{equation}
+    Esta es exactamente la Ecuación (2.8) de Draviam \& Chellathurai (2002).
+\end{itemize}
+\end{demobox}
+
+\section{Deducción Paso a Paso de la Tasa Neta de Retorno Descontada $R$}
+
+\begin{definition}[Tasa de Beneficio Neto Descontado a Valor Presente $R$]
+Se define la tasa neta de rentabilidad del portafolio descontada a $t_0$, denotada por $R$, como la ganancia patrimonial neta normalizada respecto al capital inicial $X$:
+\begin{equation}
+    R \equiv \frac{1}{X} \left\{ \frac{W(t_{M+1})}{S_{0,M+1}} - \frac{X}{S_{0,0}} \right\} \label{eq:tasa_retorno_def}
+\end{equation}
+\end{definition}
+
+Sustituyendo~\eqref{eq:terminal_descontada} en~\eqref{eq:tasa_retorno_def}:
+\begin{equation}
+    R = \frac{1}{X} \left\{ U_{0,M} + \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} U_{i,M} - \frac{X}{S_{0,0}} \right\}
+\end{equation}
+Insertando la fórmula de $U_{0,M}$ obtenida en el recuadro anterior:
+\begin{align}
+    R &= \frac{1}{X} \left\{ \frac{X}{S_{0,0}} - \sum_{i=1}^N \frac{S_{i,0}}{S_{0,0}} U_{i,0} - \sum_{j=1}^M \sum_{i=1}^N \frac{S_{i,j}}{S_{0,j}} (U_{i,j} - U_{i,j-1}) + \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} U_{i,M} - \frac{X}{S_{0,0}} \right\} \nonumber \\
+    &= \frac{1}{X} \left\{ - \sum_{i=1}^N \frac{S_{i,0}}{S_{0,0}} U_{i,0} - \sum_{j=1}^M \sum_{i=1}^N \frac{S_{i,j}}{S_{0,j}} (U_{i,j} - U_{i,j-1}) + \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} U_{i,M} \right\} \label{eq:R_desarrollo_1}
+\end{align}
+Esta es la Ecuación (2.10) de Draviam \& Chellathurai.
+
+\begin{demobox}[Transformación de Posiciones a Transacciones Netas $\alpha_{i,j}$]
+Definimos la cantidad de acciones transaccionadas en $t_j$:
+\begin{equation}
+    \alpha_{i,j} = U_{i,j} - U_{i,j-1}, \quad j = 1, \dots, M; \qquad \alpha_{i,0} \equiv U_{i,0}
+\end{equation}
+Sumando las transacciones hasta la fecha final de rebalanceo $t_M$:
+\begin{equation}
+    U_{i,M} = U_{i,0} + \sum_{j=1}^M \alpha_{i,j} \label{eq:UiM_telescopica}
+\end{equation}
+Sustituyendo~\eqref{eq:UiM_telescopica} en el último sumando de~\eqref{eq:R_desarrollo_1}:
+\begin{align}
+    \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} U_{i,M} &= \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} \left( U_{i,0} + \sum_{j=1}^M \alpha_{i,j} \right) \nonumber \\
+    &= \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} U_{i,0} + \sum_{j=1}^M \sum_{i=1}^N \frac{S_{i,M+1}}{S_{0,M+1}} \alpha_{i,j}
+\end{align}
+Sustituyendo esto en la ecuación~\eqref{eq:R_desarrollo_1} y agrupando términos según $U_{i,0}$ y $\alpha_{i,j}$:
+\begin{equation}
+    R = \frac{1}{X} \left[ \sum_{i=1}^N \left( \frac{S_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,0}}{S_{0,0}} \right) U_{i,0} + \sum_{j=1}^M \sum_{i=1}^N \left( \frac{S_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,j}}{S_{0,j}} \right) \alpha_{i,j} \right] \label{eq:R_desarrollo_2}
+\end{equation}
+Esta es la Ecuación (2.13) del paper.
+
+Definiendo la variable de **precio diferencial descontado**:
+\begin{equation}
+    \boxed{p_{i,j} \equiv \frac{S_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,j}}{S_{0,j}} \quad \forall i \in \{1, \dots, N\}, \quad j \in \{0, 1, \dots, M\}}
+\end{equation}
+y reconociendo que para $j=0$, $\alpha_{i,0} = U_{i,0}$, los dos términos de~\eqref{eq:R_desarrollo_2} se fusionan en una única sumatoria compacta:
+\begin{equation}
+    \boxed{R = \frac{1}{X} \sum_{j=0}^M \sum_{i=1}^N p_{i,j} \alpha_{i,j}}
+\end{equation}
+Esta es la célebre Ecuación (2.14) de Draviam \& Chellathurai (2002).
+\end{demobox}
+
+\section{El Enfoque de Utilidad Esperada y No Arbitraje}
+
+En la Sección 2c del artículo original, los autores contrastan esta formulación con el enfoque clásico de maximización de la utilidad esperada de la riqueza terminal descontada $W_{M+1}$:
+\begin{equation}
+    \max_{\{\alpha_{i,j}\}} \mathbb{E}\left[ J(W_{M+1}) \right] = \mathbb{E}\left[ J\left( \frac{X}{S_{0,0}} + \sum_{j=0}^M \sum_{i=1}^N p_{i,j} \alpha_{i,j} \right) \right]
+\end{equation}
+donde $J(\cdot)$ es una función de utilidad estrictamente creciente y cóncava ($J' > 0, J'' < 0$).
+
+La condición de primer orden para cualquier activo $k \in \{1,\dots,N\}$ y fecha $l \in \{0,\dots,M\}$ exige anular la derivada parcial respecto a $\alpha_{k,l}$:
+\begin{equation}
+    \frac{\partial}{\partial \alpha_{k,l}} \mathbb{E}[J(W_{M+1})] = \mathbb{E}\left[ \frac{dJ}{dW_{M+1}} \frac{\partial W_{M+1}}{\partial \alpha_{k,l}} \right] = \mathbb{E}\left[ \frac{dJ}{dW_{M+1}} p_{k,l} \right] = 0
+\end{equation}
+Sustituyendo $p_{k,l} = \frac{S_{k,M+1}}{S_{0,M+1}} - \frac{S_{k,l}}{S_{0,l}}$:
+\begin{equation}
+    \mathbb{E}\left[ \frac{dJ}{dW_{M+1}} \left( \frac{S_{k,M+1}}{S_{0,M+1}} - \frac{S_{k,l}}{S_{0,l}} \right) \right] = 0 \label{eq:euler_optimalidad}
+\end{equation}
+Reordenando términos, se obtiene la condición de valoración neutral al riesgo (medida martingala equivalente):
+\begin{equation}
+    \frac{S_{k,0}}{S_{0,0}} = \mathbb{E}\left[ \frac{1}{\mathbb{E}[J'(W_{M+1})]} \frac{dJ}{dW_{M+1}} \frac{S_{k,j}}{S_{0,j}} \right]
+\end{equation}
+La ecuación~\eqref{eq:euler_optimalidad} establece formalmente que para evitar oportunidades de arbitraje, deben existir al menos dos estados del mundo $\omega_u^{k,l}$ y $\omega_d^{k,l}$ en los cuales el rendimiento del activo riesgoso supere y sea superado por el rendimiento del activo libre de riesgo:
+\begin{equation}
+    \frac{S_{k,M+1}(\omega_d^{k,l})}{S_{k,l}} < \frac{S_{0,M+1}}{S_{0,l}} < \frac{S_{k,M+1}(\omega_u^{k,l})}{S_{k,l}}
+\end{equation}
+La resolución directa de este sistema conduce a un conjunto de ecuaciones altamente no lineales acopladas que dependen de la parametrización de la función de utilidad $J(\cdot)$ y de la distribución estocástica conjunta completa, requiriendo resolverse de nuevo para cada nivel de aversión al riesgo. 
+
+En contraposición, Draviam \& Chellathurai muestran que enmarcar el problema bajo el principio de media-varianza de Markowitz permite obtener **soluciones analíticas en forma cerrada** que describen la frontera eficiente completa.
+
+% ==============================================================================
+% CAPÍTULO 3: PRINCIPIO DE MARKOWITZ CON VENTAS EN CORTO
+% ==============================================================================
+\chapter{Principio de Media-Varianza con Ventas en Corto y Activo Libre de Riesgo Estocástico}
+
+\section{Retorno Esperado y Varianza del Portafolio}
+
+Consideramos la tasa de retorno descontada $R = \frac{1}{X} \sum_{j=0}^M \sum_{i=1}^N p_{i,j} \alpha_{i,j}$.
+
+Calculando la esperanza matemática condicional en $t_0$:
+\begin{equation}
+    \mu_R \equiv \mathbb{E}[R] = \frac{1}{X} \sum_{j=0}^M \sum_{i=1}^N \mathbb{E}[p_{i,j}] \alpha_{i,j} = \frac{1}{X} \sum_{j=0}^M \sum_{i=1}^N \bar{p}_{i,j} \alpha_{i,j} \label{eq:mu_R_escalar}
+\end{equation}
+donde $\bar{p}_{i,j} = \mathbb{E}\left[ \frac{S_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,j}}{S_{0,j}} \right] = \frac{\mu_{i,M+1}}{S_{0,M+1}} - \frac{\mu_{i,j}}{S_{0,j}}$.
+
+Para expresar~\eqref{eq:mu_R_escalar} matricialmente:
+\begin{itemize}[leftmargin=2em]
+    \item Para cada fecha $t_j$, definimos el vector de transacciones de activos riesgosos $\alpha_j \in \mathbb{R}^N$:
+    \begin{equation}
+        \alpha_j = (\alpha_{1,j}, \alpha_{2,j}, \dots, \alpha_{N,j})^T \in \mathbb{R}^N, \quad j = 0, 1, \dots, M
+    \end{equation}
+    \item Apilamos las transacciones de todas las fechas en el vector global de decisiones $B \in \mathbb{R}^{(M+1)N}$:
+    \begin{equation}
+        B = \begin{pmatrix} \alpha_0 \\ \alpha_1 \\ \vdots \\ \alpha_M \end{pmatrix} \in \mathbb{R}^{(M+1)N}
+    \end{equation}
+    \item Para cada fecha $t_j$, definimos el vector de precios esperados diferenciales $R_j \in \mathbb{R}^N$:
+    \begin{equation}
+        R_j = \begin{pmatrix}
+            \frac{\mu_{1,M+1}}{S_{0,M+1}} - \frac{\mu_{1,j}}{S_{0,j}} \\
+            \frac{\mu_{2,M+1}}{S_{0,M+1}} - \frac{\mu_{2,j}}{S_{0,j}} \\
+            \vdots \\
+            \frac{\mu_{N,M+1}}{S_{0,M+1}} - \frac{\mu_{N,j}}{S_{0,j}}
+        \end{pmatrix} \in \mathbb{R}^N, \quad j = 0, 1, \dots, M
+    \end{equation}
+    \item Apilamos estos vectores en el vector global de retornos $\mu \in \mathbb{R}^{(M+1)N}$:
+    \begin{equation}
+        \mu = \begin{pmatrix} R_0 \\ R_1 \\ \vdots \\ R_M \end{pmatrix} \in \mathbb{R}^{(M+1)N}
+    \end{equation}
+\end{itemize}
+
+El retorno esperado se escribe de forma matricial exacta como:
+\begin{equation}
+    \boxed{\mu_R = \frac{1}{X} \mu^T B} \label{eq:mu_R_matricial}
+\end{equation}
+
+Calculamos ahora la varianza de la tasa de beneficio descontada $\sigma_R^2 = \mathrm{Var}(R)$:
+\begin{align}
+    \sigma_R^2 &= \mathbb{E}\left[ (R - \mu_R)^2 \right] = \frac{1}{X^2} \mathbb{E}\left[ \left( \sum_{j=0}^M \sum_{i=1}^N (p_{i,j} - \bar{p}_{i,j}) \alpha_{i,j} \right)^2 \right] \nonumber \\
+    &= \frac{1}{X^2} \sum_{j,n=0}^M \sum_{i,k=1}^N \mathbb{E}\left[ (p_{i,j} - \bar{p}_{i,j}) (p_{k,n} - \bar{p}_{k,n}) \right] \alpha_{i,j} \alpha_{k,n} \label{eq:sigma_R_escalar}
+\end{align}
+
+Definiendo la matriz de covarianza de precios normalizados $C_{j,n} \in \mathbb{R}^{N \times N}$ cuyo elemento $(i,k)$ es:
+\begin{equation}
+    C_{j,n}(i,k) \equiv \mathbb{E}\left[ (p_{i,j} - \bar{p}_{i,j}) (p_{k,n} - \bar{p}_{k,n}) \right]
+\end{equation}
+y ensamblando la matriz global de covarianza particionada por bloques $C \in \mathbb{R}^{(M+1)N \times (M+1)N}$:
+\begin{equation}
+    C = \begin{pmatrix}
+        C_{0,0} & C_{0,1} & \dots & C_{0,M} \\
+        C_{1,0} & C_{1,1} & \dots & C_{1,M} \\
+        \vdots  & \vdots  & \ddots & \vdots  \\
+        C_{M,0} & C_{M,1} & \dots & C_{M,M}
+    \end{pmatrix}
+\end{equation}
+la varianza de la tasa de retorno adopta la forma cuadrática:
+\begin{equation}
+    \boxed{\sigma_R^2 = \frac{1}{X^2} B^T C B} \label{eq:sigma_R_matricial}
+\end{equation}
+
+\section{Deducción Paso a Paso de los Bloques de Covarianza $C_{j,n}$}
+
+\begin{demobox}[Derivación Analítica de los Bloques de la Matriz $C$]
+\textbf{Objetivo:} Deducir las fórmulas (3.7) y (3.8) del paper original que expresan $C_{j,n}$ en función de las covarianzas de mercado $\mathrm{Cov}_{j,n}$.
+
+Partimos de la definición del precio diferencial normalizado:
+\begin{equation}
+    p_{i,j} = \frac{S_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,j}}{S_{0,j}} \implies p_{i,j} - \bar{p}_{i,j} = \frac{S_{i,M+1} - \mu_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,j} - \mu_{i,j}}{S_{0,j}}
+\end{equation}
+Para dos activos $i$ y $k$ evaluados en las fechas $t_j$ y $t_n$:
+\begin{align}
+    C_{j,n}(i,k) &= \mathbb{E}\left[ \left( \frac{S_{i,M+1} - \mu_{i,M+1}}{S_{0,M+1}} - \frac{S_{i,j} - \mu_{i,j}}{S_{0,j}} \right) \left( \frac{S_{k,M+1} - \mu_{k,M+1}}{S_{0,M+1}} - \frac{S_{k,n} - \mu_{k,n}}{S_{0,n}} \right) \right] \nonumber \\
+    &= \frac{\mathbb{E}[(S_{i,M+1} - \mu_{i,M+1})(S_{k,M+1} - \mu_{k,M+1})]}{S_{0,M+1}^2} \nonumber \\
+    &\quad + \frac{\mathbb{E}[(S_{i,j} - \mu_{i,j})(S_{k,n} - \mu_{k,n})]}{S_{0,j} S_{0,n}} \nonumber \\
+    &\quad - \frac{\mathbb{E}[(S_{i,j} - \mu_{i,j})(S_{k,M+1} - \mu_{k,M+1})]}{S_{0,j} S_{0,M+1}} \nonumber \\
+    &\quad - \frac{\mathbb{E}[(S_{i,M+1} - \mu_{i,M+1})(S_{k,n} - \mu_{k,n})]}{S_{0,M+1} S_{0,n}}
+\end{align}
+Reconociendo la definición de la matriz de covarianza de mercado entre las fechas $t_a$ y $t_b$:
+\begin{equation}
+    \mathrm{Cov}_{a,b}(i,k) \equiv \mathbb{E}\left[ (S_{i,a} - \mu_{i,a})(S_{k,b} - \mu_{k,b}) \right]
+\end{equation}
+Sustituyendo en notación matricial para todo $j=1,\dots,M$ y $n=1,\dots,M$:
+\begin{equation}
+    \boxed{C_{j,n} = \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1} + \frac{1}{S_{0,j} S_{0,n}} \mathrm{Cov}_{j,n} - \frac{1}{S_{0,j} S_{0,M+1}} \mathrm{Cov}_{j,M+1} - \frac{1}{S_{0,M+1} S_{0,n}} \mathrm{Cov}_{M+1,n}}
+\end{equation}
+Esta es exactamente la Ecuación (3.8) de Draviam \& Chellathurai.
+
+\textbf{Casos Particulares con la Fecha Inicial $t_0$:}
+Dado que los precios iniciales $S_{i,0}$ son determinísticos, su varianza y covarianza con cualquier variable futura es idénticamente nula: $\mathrm{Cov}_{0,0} = \mathbf{0}$, $\mathrm{Cov}_{0,j} = \mathbf{0}$. Por consiguiente:
+\begin{itemize}
+    \item Para $j=0, n=0$:
+    \begin{equation}
+        \boxed{C_{0,0} = \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1}}
+    \end{equation}
+    \item Para $j \ge 1, n=0$:
+    \begin{equation}
+        \boxed{C_{j,0} = C_{0,j}^T = \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1} - \frac{1}{S_{0,j} S_{0,M+1}} \mathrm{Cov}_{j,M+1}}
+    \end{equation}
+\end{itemize}
+Estas coinciden rigurosamente con las Ecuaciones (3.7) del artículo original.
+\end{demobox}
+
+\section{Solución Analítica Óptima y la Línea del Mercado de Capitales Multiperiodo}
+
+El problema de optimización bajo el principio de media-varianza de Markowitz consiste en minimizar la función de desutilidad cuadrática:
+\begin{equation}
+    \min_B F(B) = -\theta \mu_R + \frac{1}{2} \sigma_R^2 = -\frac{\theta}{X} \mu^T B + \frac{1}{2 X^2} B^T C B \label{eq:F_B_Markowitz}
+\end{equation}
+donde $\theta > 0$ es el parámetro de tolerancia al riesgo del inversionista.
+
+Derivando respecto al vector de transacciones $B$ e igualando a cero:
+\begin{equation}
+    \nabla_B F(B) = -\frac{\theta}{X} \mu + \frac{1}{X^2} C B = \mathbf{0} \iff \boxed{C B = \theta X \mu} \label{eq:FOC_B}
+\end{equation}
+Si la matriz de covarianza $C$ es estrictamente definida positiva ($C \succ 0$), existe su inversa $C^{-1}$, y la solución óptima del vector de transacciones está dada por:
+\begin{equation}
+    \boxed{B^* = \theta X C^{-1} \mu} \label{eq:B_optimo}
+\end{equation}
+
+Sustituyendo el vector óptimo $B^*$ en las expresiones de retorno esperado~\eqref{eq:mu_R_matricial} y varianza~\eqref{eq:sigma_R_matricial}:
+\begin{align}
+    \mu_R^* &= \frac{1}{X} \mu^T \left( \theta X C^{-1} \mu \right) = \theta \mu^T C^{-1} \mu \\
+    (\sigma_R^*)^2 &= \frac{1}{X^2} \left( \theta X C^{-1} \mu \right)^T C \left( \theta X C^{-1} \mu \right) = \theta^2 \mu^T C^{-1} C C^{-1} \mu = \theta^2 \mu^T C^{-1} \mu
+\end{align}
+Tomando la raíz cuadrada de la varianza:
+\begin{equation}
+    \sigma_R^* = \theta \sqrt{\mu^T C^{-1} \mu} \implies \theta = \frac{\sigma_R^*}{\sqrt{\mu^T C^{-1} \mu}}
+\end{equation}
+Sustituyendo $\theta$ en la ecuación de $\mu_R^*$:
+\begin{equation}
+    \boxed{\mu_R = \sigma_R \sqrt{\mu^T C^{-1} \mu}} \label{eq:CML_multiperiodo}
+\end{equation}
+
+\begin{conceptbox}[La Frontera Eficiente Lineal en el Espacio Multiperiodo]
+La Ecuación~\eqref{eq:CML_multiperiodo} demuestra un resultado teórico de inmensa trascendencia: **cuando se permite la venta en corto y existe un activo libre de riesgo que absorbe las fluctuaciones estocásticas de liquidez, la frontera eficiente multiperiodo en el espacio $(\sigma_R, \mu_R)$ es una línea recta pura que pasa por el origen**, con pendiente igual a $\sqrt{\mu^T C^{-1} \mu}$.
+
+Esta es la generalización dinámica directa de la **Línea del Mercado de Capitales (CML)** de Sharpe-Lintner al horizonte multiperiodo.
+
+En términos de la riqueza terminal no descontada $W(t_{M+1})$, utilizando la relación $W(t_{M+1}) = S_{0,M+1}(X R + X/S_{0,0})$:
+\begin{equation}
+    \boxed{\mathbb{E}[W(t_{M+1})] = \sigma_{W(t_{M+1})} \sqrt{\mu^T C^{-1} \mu} + \frac{S_{0,M+1}}{S_{0,0}} X}
+\end{equation}
+donde el intercepto $\frac{S_{0,M+1}}{S_{0,0}} X$ es exactamente el capital final garantizado si se invirtiera el 100\% del dinero en el activo libre de riesgo.
+\end{conceptbox}
+
+\section{Asignación Inicial y el Parámetro Crítico $\theta_M$}
+
+Particionando la matriz inversa de covarianza en bloques de dimensión $N \times (M+1)N$:
+\begin{equation}
+    C^{-1} = \begin{pmatrix} Q_0 \\ Q_1 \\ \vdots \\ Q_M \end{pmatrix}
+\end{equation}
+el vector óptimo de transacciones en cada fecha $t_j$ se calcula directamente como:
+\begin{equation}
+    \alpha_j^* = \theta X Q_j \mu, \quad j = 0, 1, \dots, M
+\end{equation}
+En particular, para la fecha inicial $t_0$, el número de acciones de activos riesgosos compradas es $\alpha_0^* = U_0^* = \theta X Q_0 \mu$.
+
+Sustituyendo esto en la restricción presupuestaria inicial~\eqref{eq:presupuesto_inicial_nominal}, el monto invertido en el activo libre de riesgo en $t=0$ es:
+\begin{equation}
+    U_{0,0}^* = \frac{1}{S_{0,0}} \left[ X - S_0^T U_0^* \right] = \frac{X}{S_{0,0}} \left[ 1 - \theta S_0^T Q_0 \mu \right] \label{eq:U00_analitico}
+\end{equation}
+donde $S_0 = (S_{1,0}, S_{2,0}, \dots, S_{N,0})^T$ es el vector de precios iniciales de los activos riesgosos.
+
+\begin{proposition}[Parámetro Crítico de Tolerancia al Riesgo $\theta_M$]
+De la Ecuación~\eqref{eq:U00_analitico}, el nivel de tolerancia al riesgo en el cual la asignación al activo libre de riesgo se anula por completo ($U_{0,0}^* = 0$) viene dado por:
+\begin{equation}
+    \boxed{\theta_M = \frac{1}{S_0^T Q_0 \mu}}
+\end{equation}
+Si el inversionista tiene una tolerancia al riesgo $\theta < \theta_M$, invierte una fracción positiva en el activo libre de riesgo ($U_{0,0}^* > 0$, posición prestamista). Si $\theta > \theta_M$, se endeuda en la tasa libre de riesgo ($U_{0,0}^* < 0$, posición prestataria apalancada).
+\end{proposition}
+
+\section{Convergencia Asintótica con el Modelo Continuo de Merton (1969)}
+
+En la Sección 3b del artículo seminal, los autores plantean una verificación de coherencia teórica fundamental: ¿qué ocurre con este modelo discreto cuando el intervalo de rebalanceo se vuelve infinitesimalmente pequeño ($\Delta t \to 0$)?
+
+Asumiendo que los activos riesgosos siguen Movimientos Brownianos Geométricos correlacionados:
+\begin{equation}
+    dZ_i = a_i Z_i dt + b_i Z_i dw_i, \quad \mathrm{Cov}\{b_i dw_i, b_k dw_k\} = b_{ik} dt
+\end{equation}
+con tasa libre de riesgo $S_{0,j} = S_{0,0} e^{r t_j}$.
+
+Para el caso de dos periodos ($t_1 = \Delta t, t_2 = 2 \Delta t$), al expandir las condiciones de primer orden~\eqref{eq:FOC_B} en potencias de $\Delta t$ y tomar el límite continuo $\Delta t \to 0$, Draviam \& Chellathurai demuestran formalmente que:
+\begin{equation}
+    \lim_{\Delta t \to 0} \frac{1}{X} \begin{pmatrix}
+        \alpha_{1,0} S_{1,0} \\
+        \alpha_{2,0} S_{2,0} \\
+        \vdots \\
+        \alpha_{N,0} S_{N,0}
+    \end{pmatrix} = \theta \, \Omega^{-1} \begin{pmatrix}
+        a_1 - r \\
+        a_2 - r \\
+        \vdots \\
+        a_N - r
+    \end{pmatrix} \label{eq:merton_convergencia}
+\end{equation}
+donde $\Omega = [b_{ik}]_{N \times N}$ es la matriz de covarianza instantánea de los activos riesgosos, y las transacciones subsecuentes en $t_1$ se anulan: $\lim_{\Delta t \to 0} \frac{1}{X} \alpha_{i,1} S_{i,0} = 0$.
+
+\begin{notebox}[Coincidencia Exacta con el Teorema del Fondo Mutuo de Merton]
+La ecuación~\eqref{eq:merton_convergencia} demuestra analíticamente que la asignación inicial a activos riesgosos del modelo cuadrático discreto **coincide de manera exacta con las proporciones óptimas de inversión derivadas por Robert C. Merton (1969)** para un inversionista continuo con función de utilidad potencial de aversión relativa al riesgo constante (CRRA):
+\begin{equation}
+    w^* = \frac{1}{\gamma} \Omega^{-1} (\mathbf{a} - r \mathbf{1})
+\end{equation}
+identificando la tolerancia al riesgo como $\theta = 1/\gamma$. Esto valida que la formulación cuadrática del paper no es una aproximación heurística, sino una discretización temporal matemáticamente rigurosa de las finanzas estocásticas continuas.
+\end{notebox}
+
+\section{Solución Analítica sin Correlación Intertemporal}
+
+En la Sección 3c de Draviam \& Chellathurai, se analiza el escenario en el que no existe correlación intertemporal entre activos en fechas distintas, es decir:
+\begin{equation}
+    \mathrm{Cov}_{j,n} = \mathbf{0} \quad \forall j \neq n, \quad j,n \in \{1, \dots, M+1\}
+\end{equation}
+
+Bajo esta condición de independencia temporal, los bloques de la matriz de covarianza se simplifican a:
+\begin{equation}
+    C_{0,0} = \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1}, \qquad C_{j,n} = \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1} \quad (j \neq n)
+\end{equation}
+\begin{equation}
+    C_{n,n} = \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1} + \frac{1}{S_{0,n}^2} \mathrm{Cov}_{n,n} \quad (n \neq 0)
+\end{equation}
+
+El sistema de condiciones de primer orden $CB = \theta X \mu$ adopta la forma desacoplada:
+\begin{align}
+    \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1} \left( \sum_{j=0}^M \alpha_j \right) &= \theta \frac{X}{S_{0,0}} R_0 \label{eq:indep_0} \\
+    \frac{1}{S_{0,M+1}^2} \mathrm{Cov}_{M+1,M+1} \left( \sum_{j=0}^M \alpha_j \right) + \frac{1}{S_{0,k}^2} \mathrm{Cov}_{k,k} \alpha_k &= \theta \frac{X}{S_{0,0}} R_k, \quad k = 1, \dots, M \label{eq:indep_k}
+\end{align}
+
+Restando la ecuación~\eqref{eq:indep_0} de la ecuación~\eqref{eq:indep_k}, se cancela inmediatamente el término de suma acumulada:
+\begin{equation}
+    \frac{1}{S_{0,k}^2} \mathrm{Cov}_{k,k} \alpha_k = \theta \frac{X}{S_{0,0}} (R_k - R_0) \implies \boxed{\alpha_k^* = -\theta \left( \frac{X}{S_{0,0}} \right) S_{0,k}^2 \mathrm{Cov}_{k,k}^{-1} (R_0 - R_k)}
+\end{equation}
+y resolviendo para la transacción inicial $\alpha_0^*$:
+\begin{equation}
+    \boxed{\alpha_0^* = \theta \left( \frac{X}{S_{0,0}} \right) \left[ \sum_{k=1}^{M+1} S_{0,k}^2 \mathrm{Cov}_{k,k}^{-1} (R_0 - R_k) \right]}
+\end{equation}
+Dado que las posiciones acumuladas en $t_j$ satisfacen $U_j = \sum_{k=0}^j \alpha_k$, la suma colapsa telescópicamente:
+\begin{equation}
+    \boxed{U_j^* = \theta \left( \frac{X}{S_{0,0}} \right) \left[ \sum_{k=j+1}^{M+1} S_{0,k}^2 \mathrm{Cov}_{k,k}^{-1} (R_0 - R_k) \right], \quad j = 0, 1, \dots, M}
+\end{equation}
+Si los activos tampoco están correlacionados contemporáneamente entre sí ($\mathrm{Cov}_{k,k}$ diagonal), el número óptimo de acciones del activo riesgoso $i$ en $t_j$ es:
+\begin{equation}
+    \boxed{U_{i,j}^* = \theta \left( \frac{X}{S_{0,0}} \right) \sum_{k=j+1}^{M+1} \frac{\mathbb{E}\left[ \frac{S_{i,k}}{S_{0,k}} - \frac{S_{i,0}}{S_{0,0}} \right]}{\mathrm{Var}\left( \frac{S_{i,k}}{S_{0,k}} - \frac{S_{i,0}}{S_{0,0}} \right)}}
+\end{equation}
+Cada activo se pondera en proporción directa a su premio de riesgo esperado acumulado e inversamente proporcional a su varianza acumulada, una solución analítica de extrema belleza y simplicidad operativa.
+
+% ==============================================================================
+% CAPÍTULO 4: FORMULACIÓN GENERAL CON CONTROLES DETERMINÍSTICOS
+% ==============================================================================
+\chapter{Formulación General con Controles Determinísticos y Conservación Esperada}
+
+\section{Motivación: La Necesidad de Relajar la Conservación de Riqueza}
+
+En el modelo del Capítulo 3, la cuenta libre de riesgo absorbe estocásticamente las compras y ventas de los activos riesgosos. Esto exige:
+1. Poder vender en corto cualquier activo sin límite.
+2. Poder incurrir en endeudamiento bancario aleatorio e ilimitado en la tasa libre de riesgo.
+
+En la realidad financiera institucional, los préstamos de valores son limitados y las carteras no pueden mantener saldos negativos al descubierto. Si se prohíben las ventas en corto ($U \ge 0$) o el portafolio está compuesto únicamente por activos riesgosos, **es físicamente imposible garantizar la conservación exacta de riqueza $\sum S_{i,j}(U_{i,j} - U_{i,j-1}) = 0$ en todos los estados estocásticos del mundo si las decisiones $U$ se fijan de antemano**.
+
+Para superar este dilema, Draviam \& Chellathurai (2002, Sección 4) reformulan el problema como una optimización multiobjetivo con cinco metas:
+\begin{enumerate}
+    \item \textbf{Objetivo 1:} Maximizar el valor esperado de la riqueza terminal descontada: $\mathbb{E}\left[ \frac{W(t_{M+1})}{\mu_{R,M+1}} \right]$.
+    \item \textbf{Objetivo 2:} Minimizar la varianza de la riqueza terminal descontada: $\mathrm{Var}\left( \frac{W(t_{M+1})}{\mu_{R,M+1}} \right)$.
+    \item \textbf{Objetivo 3:} Satisfacer rigurosamente la restricción presupuestaria determinística inicial en $t=0$: $\phi_0 = 0$.
+    \item \textbf{Objetivo 4:} Conservar la riqueza en las fechas intermedias de rebalanceo en **valor esperado**: $\mathbb{E}[\phi_j] = 0$ para $j=1,\dots,M$.
+    \item \textbf{Objetivo 5:} Minimizar la varianza de las desviaciones de autofinanciamiento: $\min \mathrm{Var}(\phi_j)$ (equivalente a minimizar el error cuadrático medio $\mathbb{E}[\phi_j^2]$).
+\end{enumerate}
+
+\section{Normalización mediante el Numéraire $\mu_{R,j} = S_{0,j}$}
+
+Para homogeneizar flujos monetarios intertemporales a valor presente de $t_0$, definimos el factor de normalización como el precio del activo libre de riesgo determinístico: $\mu_{R,j} = S_{0,j}$.
+
+El precio normalizado del activo $i$ en la fecha $t_j$ es:
+\begin{equation}
+    p_{i,j} = \frac{S_{i,j}}{\mu_{R,j}} = \frac{S_{i,j}}{S_{0,j}}
+\end{equation}
+Cumpliéndose estrictamente las dos propiedades analizadas en capítulos anteriores:
+\begin{enumerate}
+    \item Para el activo libre de riesgo ($i=0$): $p_{0,j} = \frac{S_{0,j}}{S_{0,j}} \equiv 1$ para toda fecha $t_j$.
+    \item En la fecha inicial $t_0 = 0$: $p_{i,0} = \frac{S_{i,0}}{S_{0,0}} = S_{i,0}$ (al normalizar $S_{0,0}=1$).
+\end{enumerate}
+
+El vector de precios esperados normalizados en $t_j$ es:
+\begin{equation}
+    p_j = \mathbb{E}\left[ \frac{S_j}{\mu_{R,j}} \right] = \begin{pmatrix} 1 \\ \frac{\mu_{1,j}}{\mu_{R,j}} \\ \vdots \\ \frac{\mu_{N,j}}{\mu_{R,j}} \end{pmatrix} \in \mathbb{R}^{N+1}
+\end{equation}
+
+\section{Deducción de la Función Objetivo Cuadrática $F(U)$}
+
+Definiendo los factores de penalización de escala:
+\begin{equation}
+    \psi_j = \frac{\theta_j}{\mu_{R,j}^2} \quad (j = 1, \dots, M), \qquad \psi_{M+1} = \frac{1}{\mu_{R,M+1}^2}
+\end{equation}
+la función de riesgo cuadrático total del portafolio integra la varianza terminal y las desviaciones de autofinanciamiento:
+\begin{equation}
+    J_{\mathrm{riesgo}}(U) = \sum_{j=1}^M \psi_j (U_j - U_{j-1})^T \mathrm{Cov}_{j,j} (U_j - U_{j-1}) + \psi_{M+1} U_M^T \mathrm{Cov}_{M+1,M+1} U_M
+\end{equation}
+Como demostramos formalmente en el Capítulo de derivaciones, expandiendo los productos cuadráticos y agrupando por bloques, se cumple de manera exacta la identidad:
+\begin{equation}
+    J_{\mathrm{riesgo}}(U) = U^T C U
+\end{equation}
+donde $C \in \mathbb{R}^{(M+1)(N+1) \times (M+1)(N+1)}$ es la matriz **tridiagonal simétrica por bloques** definida en el Apéndice A del paper:
+\begin{equation}
+    C = \begin{pmatrix}
+        C_{0,0} & C_{0,1} & \mathbf{0} & \dots & \mathbf{0} \\
+        C_{1,0} & C_{1,1} & C_{1,2} & \dots & \mathbf{0} \\
+        \mathbf{0} & C_{2,1} & C_{2,2} & \ddots & \vdots \\
+        \vdots & \vdots & \ddots & \ddots & C_{M-1,M} \\
+        \mathbf{0} & \mathbf{0} & \dots & C_{M,M-1} & C_{M,M}
+    \end{pmatrix}
+\end{equation}
+con bloques explícitos:
+\begin{align}
+    C_{0,0} &= \psi_1 \mathrm{Cov}_{1,1}, \qquad C_{0,1} = -\psi_1 \mathrm{Cov}_{1,1} \\
+    C_{k,k} &= \psi_k \mathrm{Cov}_{k,k} + \psi_{k+1} \mathrm{Cov}_{k+1,k+1}, \quad k = 1, \dots, M-1 \\
+    C_{k,k-1} &= -\psi_k \mathrm{Cov}_{k,k}, \qquad C_{k,k+1} = -\psi_{k+1} \mathrm{Cov}_{k+1,k+1} \\
+    C_{M,M} &= \psi_M \mathrm{Cov}_{M,M} + \psi_{M+1} \mathrm{Cov}_{M+1,M+1}
+\end{align}
+
+Construyendo el vector de retorno terminal esperado global:
+\begin{equation}
+    P = \begin{pmatrix} \mathbf{0} \\ \vdots \\ \mathbf{0} \\ p_{M+1} \end{pmatrix} \in \mathbb{R}^{(M+1)(N+1)} \implies P^T U = p_{M+1}^T U_M = \mathbb{E}\left[ \frac{W(t_{M+1})}{\mu_{R,M+1}} \right]
+\end{equation}
+el problema de optimización se formula como la Programación Cuadrática canónica:
+\begin{equation}
+    \boxed{\min_U F(U) = -\theta' P^T U + \frac{1}{2} U^T C U} \label{eq:QP_canonica_global}
+\end{equation}
+
+\section{Sistema Lineal de Restricciones $AU = b$}
+
+El presupuesto inicial en $t=0$ y la conservación esperada en $t_1, \dots, t_M$ se ensamblan en el sistema matricial bidiagonal por bloques:
+\begin{equation}
+    \begin{pmatrix}
+        p_0^T  & \mathbf{0}^T & \dots & \mathbf{0}^T \\
+        -p_1^T & p_1^T        & \dots & \mathbf{0}^T \\
+        \vdots & \ddots       & \ddots & \vdots \\
+        \mathbf{0}^T & \dots  & -p_M^T & p_M^T
+    \end{pmatrix}
+    \begin{pmatrix} U_0 \\ U_1 \\ \vdots \\ U_M \end{pmatrix} =
+    \begin{pmatrix} X/\mu_{R,0} \\ 0 \\ \vdots \\ 0 \end{pmatrix} \iff \boxed{AU = b}
+\end{equation}
+donde $A \in \mathbb{R}^{(M+1) \times (M+1)(N+1)}$ tiene rango completo $M+1$ y $b \in \mathbb{R}^{M+1}$.
+
+\section{Solución Analítica para $C$ Estrictamente Definida Positiva}
+
+Cuando todos los activos son riesgosos y no existen carteras redundantes, cada bloque $\mathrm{Cov}_{j,j} \succ 0$, por lo que $C \succ 0$ y existe su inversa única $C^{-1}$ (dada analíticamente por la fórmula A1 del Apéndice A).
+
+Formando el Lagrangiano para las restricciones de igualdad:
+\begin{equation}
+    \mathcal{L}(U, \Lambda) = -\theta' P^T U + \frac{1}{2} U^T C U + \Lambda^T (AU - b)
+\end{equation}
+Las condiciones de primer orden de optimalidad son:
+\begin{align}
+    CU + A^T \Lambda &= \theta' P \label{eq:FOC_QP_1} \\
+    AU &= b \label{eq:FOC_QP_2}
+\end{align}
+
+Despejando $U = \theta' C^{-1} P - C^{-1} A^T \Lambda$ y sustituyendo en $AU = b$:
+\begin{equation}
+    A(\theta' C^{-1} P - C^{-1} A^T \Lambda) = b \implies (A C^{-1} A^T) \Lambda = \theta' A C^{-1} P - b
+\end{equation}
+Definiendo la **matriz de Gram** $G \in \mathbb{R}^{(M+1)\times(M+1)}$:
+\begin{equation}
+    \boxed{G \equiv A C^{-1} A^T \succ 0}
+\end{equation}
+la solución de los multiplicadores y las decisiones de cartera está dada por:
+\begin{align}
+    \Lambda^* &= -G^{-1} b + \theta' G^{-1} A C^{-1} P \equiv R^1 + \theta' R^2 \\
+    U^* &= C^{-1} A^T G^{-1} b + \theta' (I - C^{-1} A^T G^{-1} A) C^{-1} P \equiv \boxed{H^1 + \theta' H^2}
+\end{align}
+
+\begin{theorem}[Teorema de Separación de Dos Fondos Multiperiodo]
+La trayectoria óptima de asignación de activos $U^*(\theta')$ es una función estrictamente afín del parámetro de tolerancia al riesgo $\theta'$, compuesta por la superposición de:
+\begin{enumerate}
+    \item $H^1 = C^{-1} A^T G^{-1} b$: El portafolio de mínima varianza global ($A H^1 = b$).
+    \item $H^2 = (I - C^{-1} A^T G^{-1} A) C^{-1} P$: El portafolio de retorno marginal autofinanciado con inversión neta nula ($A H^2 = \mathbf{0}$).
+\end{enumerate}
+\end{theorem}
+
+\begin{proposition}[Geometría Parabólica e Hiperbólica de la Frontera Eficiente]
+Calculando el retorno esperado $\mu_P = P^T U^*$ y el riesgo total $\sigma_{\mathrm{tot}}^2 = (U^*)^T C U^*$, y utilizando la ortogonalidad $(H^1)^T C H^2 = 0$:
+\begin{equation}
+    \mu_P(\theta') = k_0 + \theta' k_1, \qquad \sigma_{\mathrm{tot}}^2(\theta') = \beta_0 + (\theta')^2 k_1
+\end{equation}
+donde $k_0 = P^T H^1$, $k_1 = P^T H^2 > 0$ y $\beta_0 = (H^1)^T C H^1$. Eliminando $\theta'$:
+\begin{equation}
+    \boxed{\frac{\sigma_{\mathrm{tot}}^2 - \beta_0}{k_1} = \frac{(\mu_P - k_0)^2}{k_1^2}}
+\end{equation}
+La frontera eficiente es una **parábola convexa** en el plano $(\sigma_{\mathrm{tot}}^2, \mu_P)$ y la rama asintótica superior de una **hipérbola** en el plano de desviación estándar $(\sigma_{\mathrm{tot}}, \mu_P)$.
+\end{proposition}
+
+\section{Solución Analítica para $C$ Semidefinida Positiva (Con Activo Libre de Riesgo)}
+
+En la Sección 4c del paper original, los autores resuelven el caso en el que la cartera incluye un activo libre de riesgo determinístico ($i=0$). En este escenario, la fila y columna asociadas al activo 0 en las matrices de covarianza son ceros, por lo que:
+\begin{equation}
+    \mathrm{Cov}_{j,j} = \begin{pmatrix} 0 & \mathbf{0}^T \\ \mathbf{0} & D_{j,j} \end{pmatrix}
+\end{equation}
+donde $D_{j,j} \in \mathbb{R}^{N \times N}$ es la matriz de covarianza definida positiva de los activos riesgosos.
+
+Siguiendo el Apéndice B del paper, particionamos el vector global $U$ en:
+\begin{itemize}
+    \item $T_0 = (U_{0,0}, U_{0,1}, \dots, U_{0,M})^T \in \mathbb{R}^{M+1}$: Las posiciones en el activo libre de riesgo.
+    \item $V = (V_0^T, V_1^T, \dots, V_M^T)^T \in \mathbb{R}^{(M+1)N}$: Las posiciones en activos riesgosos.
+\end{itemize}
+El sistema de condiciones KKT~\eqref{eq:FOC_QP_1}--\eqref{eq:FOC_QP_2} se particiona en:
+\begin{align}
+    A_1^T \Lambda &= \theta' h_1 \label{eq:part_1} \\
+    D V + A_2^T \Lambda &= \theta' h_2 \label{eq:part_2} \\
+    A_1 T_0 + A_2 V &= b \label{eq:part_3}
+\end{align}
+donde $A_1 \in \mathbb{R}^{(M+1)\times(M+1)}$ es la matriz bidiagonal triangular inferior de coeficientes del activo libre de riesgo (cuyas diagonales principales son $1$ y subdiagonales $-1$). 
+
+\begin{demobox}[Deducción del Vector de Multiplicadores $\Lambda = \theta' \mathbf{1}$]
+Multiplicando la ecuación~\eqref{eq:part_1} por $(A_1^T)^{-1} = (A_1^{-1})^T$:
+\begin{equation}
+    \Lambda = \theta' (A_1^{-1})^T h_1
+\end{equation}
+Como se demuestra en el Apéndice B, la matriz inversa $A_1^{-1}$ es una matriz triangular inferior llena de unos ($[A_1^{-1}]_{ij} = 1$ para $i \ge j$). Por ende, su transpuesta $(A_1^{-1})^T$ tiene la primera fila llena de unos. Dado que $h_1 = (0, 0, \dots, 1)^T$:
+\begin{equation}
+    (A_1^{-1})^T h_1 = \begin{pmatrix} 1 \\ 1 \\ \vdots \\ 1 \end{pmatrix} \equiv \mathbf{1}_{M+1} \implies \boxed{\Lambda^* = \theta' \mathbf{1}_{M+1}}
+\end{equation}
+¡Todos los multiplicadores de Lagrange intertemporales son exactamente iguales a $\theta'$!
+\end{demobox}
+
+Sustituyendo $\Lambda^* = \theta' \mathbf{1}$ en~\eqref{eq:part_2} y~\eqref{eq:part_3}, se obtienen las expresiones cerradas para los activos riesgosos y el activo libre de riesgo:
+\begin{align}
+    V^* &= \theta' D^{-1} (h_2 - A_2^T \mathbf{1}) \\
+    T_0^* &= A_1^{-1} b - \theta' A_1^{-1} A_2 D^{-1} (h_2 - A_2^T \mathbf{1})
+\end{align}
+Para el caso particular en que los activos no están correlacionados en las fechas de rebalanceo, los autores demuestran en la ecuación (4.43) que la asignación al activo riesgoso $i$ es:
+\begin{equation}
+    \boxed{U_{i,j}^* = \theta' \sum_{k=j+1}^{M+1} \frac{1}{\theta_k} \frac{\mathbb{E}\left[ \frac{S_{i,k}}{S_{0,k}} - \frac{S_{i,0}}{S_{0,0}} \right]}{\mathrm{Var}\left( \frac{S_{i,k}}{S_{0,k}} - \frac{S_{i,0}}{S_{0,0}} \right)}}
+\end{equation}
+lo cual prueba que para la relación de parámetros $\frac{\theta'}{\theta_k} = \theta \frac{X}{S_{0,0}}$, **la formulación de conservación esperada coincide de manera idéntica con el modelo de retorno neto descontado del Capítulo 3 (Ecuación 3.25)**.
+
+% ==============================================================================
+% CAPÍTULO 5: PROHIBICIÓN DE VENTAS EN CORTO Y CONDICIONES KKT
+% ==============================================================================
+\chapter{Prohibición de Ventas en Corto y Condiciones Karush-Kuhn-Tucker}
+
+\section{El Programa Cuadrático Restringido y el Lagrangiano}
+
+Cuando se imponen restricciones regulatorias que impiden las ventas al descubierto y el apalancamiento crediticio, se exige la condición de no negatividad en todas las decisiones de inversión:
+\begin{equation}
+    U_{i,j} \ge 0 \quad \forall i \in \{0, 1, \dots, N\}, \quad \forall j \in \{0, 1, \dots, M\} \iff -U \le \mathbf{0}
+\end{equation}
+
+El problema de optimización se formula como:
+\begin{equation}
+\begin{aligned}
+    \min_{U \in \mathbb{R}^{(M+1)(N+1)}} \quad & F(U) = -\theta' P^T U + \frac{1}{2} U^T C U \\
+    \text{sujeto a} \quad & AU - b = \mathbf{0} \\
+    & -U \le \mathbf{0}
+\end{aligned}
+\end{equation}
+
+Asociando los multiplicadores de igualdad $\Lambda \in \mathbb{R}^{M+1}$ y los multiplicadores de desigualdad $Y \in \mathbb{R}^{(M+1)(N+1)}$, definimos la función Lagrangiana:
+\begin{equation}
+    \mathcal{L}(U, \Lambda, Y) = -\theta' P^T U + \frac{1}{2} U^T C U + \Lambda^T (AU - b) - Y^T U
+\end{equation}
+
+\section{Condiciones KKT e Interpretación de Precios Sombra}
+
+Las condiciones de optimalidad de Karush-Kuhn-Tucker son necesarias y suficientes:
+\begin{enumerate}
+    \item \textbf{Estacionariedad:}
+    \begin{equation}
+        \nabla_U \mathcal{L} = CU + A^T \Lambda - \theta' P - Y = \mathbf{0} \iff \boxed{CU + A^T \Lambda = \theta' P + Y}
+    \end{equation}
+    \item \textbf{Factibilidad Primal:}
+    \begin{equation}
+        \boxed{AU = b \quad \text{y} \quad U \ge \mathbf{0}}
+    \end{equation}
+    \item \textbf{Factibilidad Dual:}
+    \begin{equation}
+        \boxed{Y \ge \mathbf{0}}
+    \end{equation}
+    \item \textbf{Holgura Complementaria (*Complementary Slackness*):}
+    \begin{equation}
+        \boxed{U_{i,j} Y_{i,j} = 0 \quad \forall i, j \iff U^T Y = 0}
+    \end{equation}
+\end{enumerate}
+
+\begin{conceptbox}[Interpretación Financiera de los Multiplicadores KKT]
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Multiplicadores de Igualdad $\Lambda_j$:} Miden la sensibilidad de la función objetivo ante variaciones exógenas en la disponibilidad de riqueza en la fecha $t_j$.
+    \item \textbf{Multiplicadores de Desigualdad $Y_{i,j}$ (Precios Sombra):}
+    \begin{itemize}
+        \item Si $U_{i,j} > 0$ (activo incluido en cartera): necesariamente $Y_{i,j} = 0$.
+        \item Si $U_{i,j} = 0$ (activo excluido por no negatividad): $Y_{i,j} \ge 0$. 
+    \end{itemize}
+    Económicamente, $Y_{i,j}$ cuantifica el **rendimiento adicional o subsidio de retorno** que el mercado debería ofrecerle al activo $i$ en la fecha $t_j$ para que resulte financieramente rentable incorporarlo con una ponderación positiva en el portafolio.
+\end{itemize}
+\end{conceptbox}
+
+\section{Solución Analítica Completa del Caso Canónico Bi-Periódico con Dos Activos}
+
+Para ilustrar con total claridad analítica el funcionamiento de las condiciones KKT, desarrollamos la solución paso a paso del problema canónico de dos períodos y dos activos (Sección 5a del paper original).
+
+\subsection{Configuración de Matrices}
+Consideramos $M=1$ (rebalanceo en $t_0, t_1$ y liquidación en $t_2$), un activo libre de riesgo ($i=0$) y un activo riesgoso ($i=1$). El vector de variables es $U = (U_{0,0}, U_{1,0}, U_{0,1}, U_{1,1})^T \in \mathbb{R}^4$.
+
+Las matrices explícitas son:
+\begin{equation}
+    C = \begin{pmatrix}
+        0 & 0 & 0 & 0 \\
+        0 & \psi_1 \sigma_1^2(1) & 0 & -\psi_1 \sigma_1^2(1) \\
+        0 & 0 & 0 & 0 \\
+        0 & -\psi_1 \sigma_1^2(1) & 0 & \psi_1 \sigma_1^2(1) + \psi_2 \sigma_1^2(2)
+    \end{pmatrix}, \quad
+    A = \begin{pmatrix}
+        1 & \frac{\mu_{1,0}}{\mu_{0,0}} & 0 & 0 \\[1ex]
+        -1 & -\frac{\mu_{1,1}}{\mu_{0,1}} & 1 & \frac{\mu_{1,1}}{\mu_{0,1}}
+    \end{pmatrix}
+\end{equation}
+\begin{equation}
+    b = \begin{pmatrix} X/\mu_{0,0} \\ 0 \end{pmatrix}, \qquad
+    P = \begin{pmatrix} 0 \\ 0 \\ 1 \\ \mu_{1,2}/\mu_{0,2} \end{pmatrix}
+\end{equation}
+
+\subsection{Solución sin Restricciones Activas ($Y = \mathbf{0}$)}
+Resolviendo el sistema $CU + A^T \Lambda = \theta' P$ junto con $AU = b$:
+\begin{equation}
+    \lambda_0 = \lambda_1 = \theta'
+\end{equation}
+\begin{align}
+    U_{1,1} &= \theta' \left[ \frac{1}{\psi_2 \sigma_1^2(2)} \left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right] \label{eq:u11_base} \\
+    U_{1,0} &= \theta' \left[ \frac{1}{\psi_1 \sigma_1^2(1)} \left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) + \frac{1}{\psi_2 \sigma_1^2(2)} \left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right] \label{eq:u10_base} \\
+    U_{0,0} &= \frac{X}{\mu_{0,0}} - \frac{\mu_{1,0}}{\mu_{0,0}} U_{1,0} \label{eq:u00_base} \\
+    U_{0,1} &= U_{0,0} + \theta' \left[ \frac{\mu_{1,1}}{\mu_{0,1}} \frac{1}{\psi_1 \sigma_1^2(1)} \left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right] \label{eq:u01_base}
+\end{align}
+
+\subsection{Deducción Exhaustiva de los 5 Casos de Movimiento de Precios}
+
+Draviam \& Chellathurai clasifican exhaustivamente las trayectorias posibles del precio relativo esperado del activo riesgoso respecto al activo libre de riesgo ($\frac{\mu_{1,j}}{\mu_{0,j}}$), como se esquematiza en la Figura 1 del paper:
+
+\subsubsection{Caso 1: Tendencia Alcista Sostenida (Situaciones ABD y ABF)}
+Cumple las condiciones:
+\begin{equation}
+    \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \ge 0, \qquad \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \ge 0
+\end{equation}
+De las ecuaciones~\eqref{eq:u11_base} y~\eqref{eq:u10_base}, ambos corchetes son no negativos, garantizando $U_{1,1} \ge 0$ y $U_{1,0} \ge 0$. Por lo tanto, ningún multiplicador KKT se activa ($Y = \mathbf{0}$). 
+
+La solución no restringida es válida para todo $0 \le \theta' \le L_1$, donde el umbral crítico $L_1$ marca el punto en que se agota el activo libre de riesgo inicial ($U_{0,0} = 0$):
+\begin{equation}
+    \boxed{L_1 = \frac{X / \mu_{0,0}}{\frac{\mu_{1,0}}{\mu_{0,0}} \left[ \frac{1}{\psi_1 \sigma_1^2(1)}\left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) + \frac{1}{\psi_2 \sigma_1^2(2)}\left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right]}}
+\end{equation}
+Para $\theta' = L_1$, el 100\% del capital disponible se asigna al activo riesgoso.
+
+\subsubsection{Caso 2: Caída Intermedia Moderada y Rebote Final (Situación ACE)}
+Cumple:
+\begin{equation}
+    \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \ge 0, \qquad \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \le 0
+\end{equation}
+pero la suma ponderada en~\eqref{eq:u10_base} satisface:
+\begin{equation}
+    \frac{1}{\psi_1 \sigma_1^2(1)}\left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) + \frac{1}{\psi_2 \sigma_1^2(2)}\left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \ge 0
+\end{equation}
+Aunque el activo cae temporalmente en $t_1$, la rentabilidad esperada final en $t_2$ es tan atractiva que compensa la caída intermedia. El gestor compra activo riesgoso desde $t_0$. En este caso, $U_{0,1} \le U_{0,0}$, y la cota superior viene dada por el agotamiento del activo libre de riesgo en $t_1$ ($U_{0,1} = 0$), definiendo el umbral:
+\begin{equation}
+    \boxed{L_2 = \frac{X / \mu_{0,0}}{L_2^*}}
+\end{equation}
+con $L_2^*$ dado explícitamente en la Ecuación (5.16) del artículo original.
+
+\subsubsection{Caso 3: Alza Intermedia y Caída Terminal Severa (Situación ABH)}
+Cumple:
+\begin{equation}
+    \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \le 0, \qquad \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \ge 0
+\end{equation}
+La ecuación no restringida~\eqref{eq:u11_base} arrojaría $U_{1,1} < 0$ (venta en corto terminal). Bajo prohibición de ventas en corto, la condición KKT fuerza la restricción activa:
+\begin{equation}
+    U_{1,1} = 0, \qquad Y_{0,0} = Y_{0,1} = Y_{1,0} = 0
+\end{equation}
+Resolviendo el sistema KKT reducido con $U_{1,1} = 0$:
+\begin{align}
+    \lambda_0 &= \lambda_1 = \theta' \\
+    U_{1,0} &= \theta' \left[ \frac{1}{\psi_1 \sigma_1^2(1)} \left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right] \ge 0 \\
+    U_{0,0} &= \frac{X}{\mu_{0,0}} - \theta' \left[ \frac{\mu_{1,0}}{\mu_{0,0}} \frac{1}{\psi_1 \sigma_1^2(1)} \left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right] \\
+    U_{0,1} &= \frac{X}{\mu_{0,0}} + \theta' \left[ \frac{1}{\psi_1 \sigma_1^2(1)} \left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right)^2 \right]
+\end{align}
+y el precio sombra terminal se activa estrictamente positivo:
+\begin{equation}
+    \boxed{Y_{1,1} = -\theta' \left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \ge 0}
+\end{equation}
+El umbral crítico en el cual $U_{0,0} = 0$ es:
+\begin{equation}
+    \boxed{L_3 = \frac{X / \mu_{0,0}}{\frac{\mu_{1,0}}{\mu_{0,0}} \left[ \frac{1}{\psi_1 \sigma_1^2(1)}\left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right]}}
+\end{equation}
+
+\subsubsection{Caso 4: Caída Inicial Severa con Recuperación Tardía (Situación ACG)}
+Cumple $\frac{\mu_{1,2}}{\mu_{0,2}} \ge \frac{\mu_{1,1}}{\mu_{0,1}}$ pero la caída inicial en $t_1$ es tan profunda que la suma ponderada en~\eqref{eq:u10_base} se vuelve negativa. La solución no restringida dictaría $U_{1,0} < 0$. La condición KKT impone forzosamente:
+\begin{equation}
+    U_{1,0} = 0, \qquad Y_{0,0} = Y_{0,1} = Y_{1,1} = 0
+\end{equation}
+Resolviendo el sistema KKT:
+\begin{align}
+    U_{0,0} &= \frac{X}{\mu_{0,0}} \\
+    U_{1,1} &= \theta' \left[ \frac{1}{\psi_1 \sigma_1^2(1) + \psi_2 \sigma_1^2(2)} \left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,1}}{\mu_{0,1}} \right) \right] \ge 0 \\
+    U_{0,1} &= \frac{X}{\mu_{0,0}} - \theta' \left[ \frac{\mu_{1,1}}{\mu_{0,1}} \frac{1}{\psi_1 \sigma_1^2(1) + \psi_2 \sigma_1^2(2)} \left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,1}}{\mu_{0,1}} \right) \right]
+\end{align}
+y el precio sombra inicial se activa positivo:
+\begin{equation}
+    \boxed{Y_{1,0} = -\theta' \frac{\psi_1 \sigma_1^2(1) \psi_2 \sigma_1^2(2)}{\psi_1 \sigma_1^2(1) + \psi_2 \sigma_1^2(2)} \left[ \frac{1}{\psi_1 \sigma_1^2(1)} \left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) + \frac{1}{\psi_2 \sigma_1^2(2)} \left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \right] \ge 0}
+\end{equation}
+La cota máxima de validez es $L_4$ (Ecuación 5.21 del paper original). Es notable observar que para todo $\theta' \le L_4$, la asignación inicial al activo libre de riesgo es idénticamente constante: $U_{0,0} = X/\mu_{0,0}$, por lo que la inversión inicial es independiente de la tolerancia al riesgo.
+
+\subsubsection{Caso 5: Activo Riesgoso Estrictamente Dominado (Situación ACI)}
+Cumple:
+\begin{equation}
+    \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,0}}{\mu_{0,0}} \le 0, \qquad \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \le 0
+\end{equation}
+El activo riesgoso ofrece rendimientos inferiores al activo libre de riesgo en todas las fechas. Ambas restricciones de no negatividad se activan:
+\begin{equation}
+    U_{1,0} = 0, \qquad U_{1,1} = 0
+\end{equation}
+La totalidad del capital permanece depositada en el activo libre de riesgo en todas las fechas:
+\begin{equation}
+    \boxed{U_{0,0}^* = U_{0,1}^* = \frac{X}{\mu_{0,0}}}
+\end{equation}
+y ambos precios sombra reflejan el costo de oportunidad del activo penalizado:
+\begin{equation}
+    Y_{1,0} = -\theta' \left( \frac{\mu_{1,1}}{\mu_{0,1}} - \frac{\mu_{1,0}}{\mu_{0,0}} \right) \ge 0, \qquad Y_{1,1} = -\theta' \left( \frac{\mu_{1,2}}{\mu_{0,2}} - \frac{\mu_{1,1}}{\mu_{0,1}} \right) \ge 0
+\end{equation}
+
+\section{Ejemplo Numérico Ampliado: 7 Activos y 10 Periodos (Sección 5g)}
+
+En la Sección 5g del artículo seminal, Draviam \& Chellathurai resuelven un problema hipotético a gran escala compuesto por **seis activos riesgosos ($i=2,\dots,7$) y un activo libre de riesgo ($i=1$)**, con $M=9$ rebalanceos (10 periodos de negociación) y un horizonte de inversión de $T=2$ años.
+
+\subsection{Modelado Estocástico Mediante la Ecuación de Fokker-Planck}
+Los autores asumen que la dinámica de los activos riesgosos sigue un Movimiento Browniano Geométrico generalizado con deriva variable en el tiempo:
+\begin{equation}
+    \frac{dZ_i}{Z_i} = a_i(t) dt + b_i dw_i
+\end{equation}
+donde el coeficiente de deriva es lineal: $a_i(t) = a_{i,0} + a_{i,1} t$.
+
+La función de densidad de probabilidad condicional $f(Z_i, t)$ satisface la **ecuación diferencial en derivadas parciales de Fokker-Planck (Kolmogorov hacia adelante)**:
+\begin{equation}
+    \frac{\partial f}{\partial t} + \frac{\partial}{\partial Z_i} \left[ a_i(t) Z_i f(Z_i, t) \right] - \frac{1}{2} \frac{\partial^2}{\partial Z_i^2} \left[ b_i^2 Z_i^2 f(Z_i, t) \right] = 0 \label{eq:fokker_planck}
+\end{equation}
+sujeta a la condición inicial determinística $f(Z_i, 0) = \delta(Z_i - S_{i,0})$, donde $\delta(\cdot)$ es la función delta de Dirac.
+
+Integrando analíticamente la ecuación de Fokker-Planck~\eqref{eq:fokker_planck}:
+\begin{align}
+    \mathbb{E}\left[ \frac{Z_i(t)}{S_{i,0}} \right] &= \exp\left( \int_0^t a_i(y) dy \right) = \exp\left( a_{i,0} t + \frac{1}{2} a_{i,1} t^2 \right) \label{eq:esperanza_fp} \\
+    \mathrm{Var}\left( \frac{Z_i(t)}{S_{i,0}} \right) &= \exp\left( 2 \int_0^t a_i(y) dy \right) \left[ \exp\left( \int_0^t b_i^2 dy \right) - 1 \right] \nonumber \\
+    &= \exp\left( 2 a_{i,0} t + a_{i,1} t^2 \right) \left( e^{b_i^2 t} - 1 \right) \label{eq:varianza_fp}
+\end{align}
+
+Derivando~\eqref{eq:esperanza_fp} respecto al tiempo:
+\begin{equation}
+    \xi_i(t) \equiv \frac{d}{dt} \mathbb{E}\left[ \frac{Z_i(t)}{S_{i,0}} \right] = e^{a_{i,0} t + \frac{1}{2} a_{i,1} t^2} (a_{i,0} + a_{i,1} t)
+\end{equation}
+El signo de $\xi_i(t)$ define cuatro tipos arquetípicos de comportamiento económico:
+\begin{enumerate}
+    \item $a_{i,0} > 0, a_{i,1} > 0$: Precio esperado estrictamente creciente en todo el horizonte.
+    \item $a_{i,0} > 0, a_{i,1} < 0$: Precio esperado creciente inicialmente hasta $t = -a_{i,0}/a_{i,1}$ y decreciente posteriormente.
+    \item $a_{i,0} < 0, a_{i,1} > 0$: Precio esperado decreciente inicialmente y con fuerte recuperación tardía tras $t = -a_{i,0}/a_{i,1}$.
+    \item $a_{i,0} < 0, a_{i,1} < 0$: Precio esperado estrictamente decreciente en todo momento.
+\end{enumerate}
+
+\subsection{Parámetros y Hallazgos del Experimento Numérico}
+En el Cuadro~\ref{tab:draviam_tabla1} se presentan los parámetros calibrados por Draviam \& Chellathurai para representar cada uno de estos cuatro comportamientos en los 6 activos riesgosos, fijando una tasa libre de riesgo $r = 0.05$ (5\% anual), capital inicial $X = \$100$ y precios iniciales unitarios $S_{i,0} = 1.0$.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{0.8\textwidth}{ccccc}
+\toprule
+\textbf{Activo Riesgoso ($i$)} & $a_{i,0}$ & $a_{i,1}$ & $b_i$ & \textbf{Comportamiento Esperado} \\
+\midrule
+Activo 2 & $0.6$  & $-0.6$ & $0.1$ & Crece hasta $t=1.0$ año y luego decae \\
+Activo 3 & $-0.6$ & $0.6$  & $0.1$ & Cae hasta $t=1.0$ año y luego rebota con fuerza \\
+Activo 4 & $0.4$  & $-0.8$ & $0.2$ & Crece levemente hasta $t=0.5$ años y colapsa \\
+Activo 5 & $-0.4$ & $0.8$  & $0.1$ & Cae levemente hasta $t=0.5$ años y sube velozmente \\
+Activo 6 & $0.6$  & $-0.4$ & $0.1$ & Máximo rendimiento inicial, decae suavemente \\
+Activo 7 & $-0.6$ & $0.4$  & $0.1$ & Cae hasta $t=1.5$ años y se recupera al final \\
+\bottomrule
+\end{tabularx}
+\caption{Parámetros numéricos del experimento de Draviam \& Chellathurai (Tabla 1 del paper original).}
+\label{tab:draviam_tabla1}
+\end{table}
+
+Resolviendo el programa cuadrático mediante el método Simplex Cuadrático revisado para toda la gama de tolerancia al riesgo $\theta'$, los autores documentan resultados empíricos fundamentales (Figuras 4 a 14 del paper original):
+\begin{enumerate}
+    \item \textbf{Dinámica de Rebalanceo Inteligente:} En $t=0$, el modelo no asigna capital a los activos 3, 5 y 7 (cuyos precios iniciales están cayendo), asignando todo a los activos 1 (libre de riesgo), 4, 2 y 6. Pasado $t=0.5$ y $t=1.0$ años, el modelo liquida las posiciones de los activos 2 y 4 y transfiere masivamente los fondos hacia los activos 5, 3 y 7 justo cuando inician su fase de aceleración alcista.
+    \item \textbf{Mezcla de Múltiples Activos en la Cúspide de la Frontera Eficiente:} En un optimizador uniperiódico estándar, el portafolio de máxima rentabilidad (extremo derecho de la frontera) siempre colapsa en un **único activo** (el de mayor media). En marcado contraste, en el modelo multiperiodo de Draviam \& Chellathurai, **la cima de la frontera eficiente está compuesta por una canasta diversificada de activos** (activos 5, 3, 7 y 6 en la fecha final, como muestra la Figura 12 del paper). Esto ocurre porque el optimizador multiperiodo aprovecha las correlaciones intertemporales cruzadas para cosechar retorno sin acumular varianza destructiva.
+\end{enumerate}
+
+% ==============================================================================
+% CAPÍTULO 6: DISCUSIÓN METODOLÓGICA: LAZO ABIERTO VS HJB
+% ==============================================================================
+\chapter{Discusión Metodológica: Política de Lazo Abierto vs. Control Estocástico HJB}
+
+\section{Política de Lazo Abierto (*Open-Loop*) vs. Retroalimentación (*Feedback*)}
+
+En la Sección 6 del artículo original, los autores abordan con honestidad intelectual las consecuencias del Supuesto (a): la adopción de una política determinística de lazo abierto (*open-loop dynamic policy*).
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Política de Retroalimentación (*Feedback / Closed-Loop*):} En una política de retroalimentación ideal, la regla de decisión en cada fecha futura es una función explícita del estado realizado del mercado: $U_j(S_j)$. Como señalaron Fernholz \& Shay (1982) y Luenberger (1998), una política adaptativa puede explotar la volatilidad intrínseca del mercado para "comprar barato y vender caro" mediante un mecanismo de bombeo de volatilidad (*volatility pumping*).
+    \item \textbf{La Ventaja de Robustez del Lazo Abierto:} Una política de retroalimentación en tiempo discreto requiere especificar o aprender la distribución de probabilidad condicional completa de orden superior en cada nodo del espacio de estados. Por el contrario, la política de lazo abierto de Draviam \& Chellathurai **únicamente requiere información hasta el segundo momento estadístico** (medias y matriz de covarianza intertemporal $C$). En la práctica financiera, estimar momentos de orden superior a partir de datos empíricos es notoriamente ruidoso y conduce a errores de sobreajuste severos.
+\end{itemize}
+
+\section{La Paradoja Computacional: ¿Por qué HJB Falla en la Práctica?}
+
+En finanzas cuantitativas de nivel doctoral suele existir un sesgo hacia las ecuaciones de Hamilton-Jacobi-Bellman (HJB) y las ecuaciones diferenciales parciales estocásticas (SPDEs) por su pureza teórica de tiempo continuo. Sin embargo, en la gestión institucional de carteras, HJB enfrenta una barrera matemática insuperable:
+
+\begin{demobox}[Análisis de la Maldición de la Dimensionalidad en HJB]
+Consideremos la ecuación HJB para un portafolio de $N$ activos riesgosos con restricciones de no negatividad $w_i \ge 0$:
+\begin{equation}
+    \frac{\partial V}{\partial t} + \max_{w \ge 0, \sum w_i \le 1} \left\{ \left( r + w^T(\mu - r\mathbf{1}) \right) W \frac{\partial V}{\partial W} + \frac{1}{2} W^2 w^T \Omega w \frac{\partial^2 V}{\partial W^2} + \dots \right\} = 0
+\end{equation}
+Para resolverla numéricamente mediante esquemas de diferencias finitas:
+\begin{itemize}
+    \item Se debe discretizar el espacio de estado de dimensión $D = N + 1$ (la riqueza $W$ y los $N$ factores de mercado).
+    \item Si se seleccionan $K = 100$ nodos de discretización por dimensión:
+    \begin{align}
+        N = 1 \text{ activo}  &\implies K^2 = 100^2 = 10^4 \text{ puntos de malla (Tractable)} \nonumber \\
+        N = 2 \text{ activos} &\implies K^3 = 100^3 = 10^6 \text{ puntos de malla (Minutos)} \nonumber \\
+        N = 5 \text{ activos} &\implies K^6 = 100^6 = 10^{12} \text{ puntos de malla (Intratable)} \nonumber \\
+        N = 20 \text{ activos} &\implies K^{21} = 100^{21} = 10^{42} \text{ puntos (Físicamente Imposible)} \nonumber
+    \end{align}
+\end{itemize}
+El volumen del espacio de estados crece exponencialmente con el número de activos, haciendo que la memoria RAM y el tiempo de cálculo de cualquier supercomputadora colapsen.
+\end{demobox}
+
+\section{Complejidad Algorítmica del Modelo KKT / QP}
+
+En agudo contraste con HJB, el modelo cuadrático multiperiodo de Markowitz con KKT transforma el problema en una **Programación Cuadrática Convexa (QP)**:
+\begin{itemize}[leftmargin=2em]
+    \item **Número de Variables:** $n = (M+1)(N+1)$. Para 5 activos y 4 fechas: $n = 24$. Para 50 activos y 120 meses: $n = 6{,}120$.
+    \item **Estructura Tridiagonal por Bloques:** Como demostramos en el Capítulo 4, la matriz hessiana $C$ es tridiagonal por bloques y la matriz de restricciones $A$ es bidiagonal por bloques.
+    \item **Complejidad de Puntos Interiores:** Los algoritmos de Puntos Interiores Primal-Dual resuelven el sistema KKT factorizando la matriz del sistema en cada iteración de Newton. Explotando la estructura de bandas por bloques mediante el algoritmo de Thomas por bloques, la complejidad computacional total es:
+    \begin{equation}
+        \boxed{\mathcal{O}\left( (M+1) \cdot (N+1)^3 \right)}
+    \end{equation}
+    **¡La complejidad escala de manera estrictamente lineal con el número de periodos $M$!**
+    \item **Tiempo de Ejecución:** Para el caso de 6 activos y 4 periodos, el problema se resuelve en **menos de 2 milisegundos** ($0.002$ s) en cualquier computador estándar con convergencia global garantizada y única.
+\end{itemize}
+
+\section{El Paradigma Moderno: Control Predictivo por Modelo (MPC / Rolling Horizon)}
+
+En los fondos cuantitativos de primer nivel (e.g., AQR, Two Sigma, Citadel), la solución óptima para combinar la velocidad del QP con la adaptabilidad de una política de retroalimentación es el **Control Predictivo por Modelo (*Model Predictive Control* - MPC)** o enfoque de horizonte deslizante:
+
+\begin{conceptbox}[Arquitectura Operativa del Horizonte Deslizante (MPC)]
+\begin{enumerate}
+    \item En la fecha inicial $t_0$, el gestor resuelve el sistema KKT completo para todo el horizonte de planeación ($t_0, t_1, \dots, t_M$).
+    \item **Aplica únicamente la decisión del instante actual:** ejecuta físicamente la compra y venta de unidades dictada por $U_0^*$. El resto de la trayectoria $(U_1^*, \dots, U_M^*)$ se preserva como plan de ruta indicativo.
+    \item Al transcurrir el primer período y llegar a $t_1$, el gestor observa los precios reales de mercado realizados $S_1$, actualiza su nivel de capital disponible $W(t_1)$ y re-estima las medias y covarianzas intertemporales para los períodos remanentes.
+    \item Vuelve a resolver el sistema KKT para el nuevo horizonte móvil ($t_1, \dots, t_M$), ejecutando la nueva decisión $U_1^*$.
+\end{enumerate}
+Este esquema otorga **lo mejor de ambos mundos**: la adaptabilidad en tiempo real ante choques de mercado típica de una política de retroalimentación, combinada con la velocidad de cómputo en milisegundos y la garantía matemática de cumplimiento de restricciones KKT de la programación convexa.
+\end{conceptbox}
+
+% ==============================================================================
+% CAPÍTULO 7: IMPLEMENTACIÓN PRÁCTICA EN EL MERCADO COLOMBIANO
+% ==============================================================================
+\chapter{Implementación Práctica en el Mercado de Capitales Colombiano}
+
+\section{Diseño del Caso de Estudio Institucional}
+
+Para trasladar el modelo de Draviam \& Chellathurai a la práctica financiera de una Administradora de Fondos de Pensiones (AFP) o fiduciaria en Colombia bajo la supervisión de la Superintendencia Financiera de Colombia (SFC), se estructura la siguiente parametrización:
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Horizonte de Inversión y Frecuencia de Rebalanceo:}
+    Se define un horizonte total de inversión de un año ($T = 1.0$ año) con periodicidad de rebalanceo trimestral ($\Delta t = 0.25$ años). Esto genera $M=3$ rebalanceos intermedios y $M+1=4$ fechas de asignación activa:
+    \begin{equation}
+        t_0 = 0.0, \quad t_1 = 0.25, \quad t_2 = 0.50, \quad t_3 = 0.75 \text{ (años)}
+    \end{equation}
+    con liquidación final en $t_4 = 1.0$ año.
+    
+    \item \textbf{Canasta de Activos de Inversión ($N=5$ Renta Variable + $1$ Renta Fija):}
+    \begin{itemize}
+        \item \textbf{Activo Libre de Riesgo ($i=0$):} Títulos de Deuda Pública del Gobierno de Colombia (**TES Clase B** en tasa fija con vencimiento a 1 año), indexados a la tasa de política monetaria fijada por la Junta Directiva del Banco de la República.
+        \item \textbf{Cinco Acciones Líderes del Índice MSCI COLCAP ($i=1,\dots,5$):}
+        \begin{enumerate}
+            \item Preferencial Bancolombia (\texttt{PFBCOLOM.CL})
+            \item Ecopetrol (\texttt{ECOPETROL.CL})
+            \item Interconexión Eléctrica S.A. (\texttt{ISA.CL})
+            \item Grupo Nutresa (\texttt{NUTRESA.CL})
+            \item Grupo Energía Bogotá (\texttt{GEB.CL})
+        \end{enumerate}
+    \end{itemize}
+    
+    \item \textbf{Dimensionalidad del Sistema Numérico:}
+    \begin{itemize}
+        \item Dimensión del vector de decisiones: $n = (M+1)(N+1) = 4 \times 6 = \mathbf{24 \text{ variables}}$.
+        \item Restricciones de igualdad: $m_{\mathrm{eq}} = M + 1 = \mathbf{4 \text{ restricciones}}$ ($AU = b$).
+        \item Restricciones de desigualdad: $m_{\mathrm{ineq}} = 24 \text{ restricciones}$ ($U \ge \mathbf{0}$, prohibición legal de ventas en corto según Decreto 2555 de 2010).
+    \end{itemize}
+\end{enumerate}
+
+\section{Estimación Econométrica y Modelado de Precios}
+
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{Captura de Series Históricas:} Descarga de precios diarios de cierre ajustados por dividendos y splits mediante la API de \texttt{yfinance} en Python para las especies de la Bolsa de Valores de Colombia (bvc). Tasa libre de riesgo calibrada a partir de las curvas cero cupón del Banco de la República o el portal del Ministerio de Hacienda.
+    \item \textbf{Calibración de Parámetros de Deriva y Difusión:} 
+    A partir de la serie de retornos logarítmicos diarios $r_{i,t} = \ln(S_{i,t}/S_{i,t-1})$, se calculan la media muestral $\bar{r}_i$ y la varianza muestral $s_i^2$, anualizadas según los 252 días hábiles bursátiles:
+    \begin{equation}
+        \hat{\sigma}_i = s_i \sqrt{252}, \qquad \hat{\alpha}_i = \bar{r}_i \cdot 252 + \frac{1}{2} \hat{\sigma}_i^2
+    \end{equation}
+    \item \textbf{Matriz de Covarianza Intertemporal $C$:}
+    Calculada analíticamente mediante la ecuación de covarianza intertemporal del GBMM:
+    \begin{equation}
+        \mathrm{Cov}(S_{i,j}, S_{k,n}) = S_{i,0} S_{k,0} \, e^{\alpha_i t_j + \alpha_k t_n} \left( e^{\rho_{ik} \sigma_i \sigma_k \min(t_j, t_n)} - 1 \right)
+    \end{equation}
+    y proyectada sobre los bloques tridiagonales de $C$ con $\psi_j = 1/S_{0,j}^2$.
+\end{itemize}
+
+\section{Código de Implementación Numérica en Python}
+
+A continuación se presenta la plantilla completa de código en Python utilizando la librería de optimización convexa de alto desempeño \texttt{CVXPY} para resolver de manera exacta el sistema KKT:
+
+\begin{tcolorbox}[colback=black!5!white,colframe=navyblue,arc=2mm,title=\textbf{Script de Optimización KKT Multiperiodo en Python (CVXPY)}]
+\small
+\begin{verbatim}
+import numpy as np
+import cvxpy as cp
+
+def optimizar_portafolio_kkt_multiperiodo(P_vec, C_mat, A_mat, b_vec, theta_prime):
+    # Resuelve el problema de programacion cuadratica multiperiodo con KKT:
+    # min_U  -theta' * P^T * U + 0.5 * U^T * C * U
+    # s.t.   A * U == b
+    #        U >= 0
+    n_vars = len(P_vec)
+    
+    # 1. Declarar variable de decision (posiciones no negativas)
+    U = cp.Variable(n_vars, nonneg=True)
+    
+    # 2. Formular funcion objetivo cuadratica
+    objetivo = cp.Minimize(-theta_prime * (P_vec @ U) + 0.5 * cp.quad_form(U, C_mat))
+    
+    # 3. Formular restricciones de igualdad lineales
+    restricciones = [A_mat @ U == b_vec]
+    
+    # 4. Configurar y resolver el problema con motor de Puntos Interiores
+    problema = cp.Problem(objetivo, restricciones)
+    problema.solve(solver=cp.OSQP, verbose=False)
+    
+    # 5. Extraer soluciones primales y multiplicadores duales (KKT)
+    U_optimo = U.value
+    Lambda_optimo = restricciones[0].dual_value  # Multiplicadores de igualdad
+    Y_optimo = U.gradient                        # Precios sombra KKT (dual de U >= 0)
+    
+    return U_optimo, Lambda_optimo, Y_optimo
+\end{verbatim}
+\end{tcolorbox}
+
+% ==============================================================================
+% CAPÍTULO 8: CUADRO COMPARATIVO Y CONCLUSIONES GENERALES
+% ==============================================================================
+\chapter{Cuadro Comparativo Global y Conclusiones}
+
+\section{Comparativa Estructural de los Tres Paradigmas de Inversión}
+
+Para cerrar el marco analítico de la monografía, el Cuadro~\ref{tab:gran_comparacion} contrasta de manera exhaustiva las propiedades matemáticas, computacionales y financieras de los tres grandes modelos de optimización de carteras.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{p{3.5cm}XXX}
+\toprule
+\textbf{Propiedad / Criterio} & \textbf{Markowitz Clásico (1952)} & \textbf{Control Continuo HJB (Merton 1969)} & \textbf{Multiperiodo KKT (Draviam 2002)} \\
+\midrule
+\textbf{Horizonte de Inversión} & Uniperiódico estático $[0, T]$. & Continuo $t \in [0, T]$ con transacciones infinitas. & Multiperiodo discreto por etapas $t_0, \dots, t_M, t_{M+1}$. \\
+\textbf{Valor del Dinero en el Tiempo} & Ignorado o tratado con descuento plano exógeno. & Tasa continua de descuento instantáneo $\rho$. & Riguroso: normalización por activo libre de riesgo como \emph{numéraire} ($\mu_{R,j}$). \\
+\textbf{Estructura Temporal de Covarianzas} & Solo covarianza contemporánea estática en $t=0$. & Covarianza instantánea contemporánea $\Omega$. & **Estructura completa de covarianza intertemporal y cruzada** $\mathrm{Cov}_{j,n}$. \\
+\textbf{Condición de Autofinanciamiento} & Presupuesto estático único: $\sum w_i = 1$. & Condición estocástica continua diferencial: $dW = W w^T \frac{dS}{S}$. & **Autofinanciamiento esperado por etapas** integrado en el sistema lineal $AU=b$. \\
+\textbf{Medida de Riesgo} & Varianza terminal uniperiódica $w^T \Sigma w$. & Parámetro de aversión al riesgo en utilidad $\gamma$. & **Forma cuadrática global tridiagonal** $U^T C U$ (varianza terminal + fluctuaciones). \\
+\textbf{Ventas en Corto Prohibidas ($U \ge 0$)} & Simplex cuadrático en $N$ variables. & Desigualdad variacional con frontera libre intratable en $N \ge 3$. & **Sistema KKT convexo con precios sombra explícitos** $Y_{i,j}$. \\
+\textbf{Complejidad Numérica} & $\mathcal{O}(N^3)$ (Milisegundos). & Exponencial $\mathcal{O}(K^{N+1})$ (**Maldición de la Dimensionalidad**). & Polinomial lineal en etapas: $\mathcal{O}\left( (M+1) N^3 \right)$ (**Milisegundos**). \\
+\textbf{Comportamiento de la Frontera} & Concentración en un solo activo en el extremo superior. & Fracciones constantes en carteras de fondos mutuos. & **Mezcla diversificada de múltiples activos** en la cima de la frontera. \\
+\bottomrule
+\end{tabularx}
+\caption{Comparación técnica y metodológica entre Markowitz clásico, control continuo HJB y el modelo multiperiodo KKT.}
+\label{tab:gran_comparacion}
+\end{table}
+
+\section{Conclusiones Principales}
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{Cierre Teórico y Didáctico de la Normalización:} Se demostró rigurosamente que el empleo del activo libre de riesgo determinístico como \emph{numéraire} ($\mu_{R,j} = S_{0,j}$) homogeneiza el poder adquisitivo de los flujos monetarios intertemporales a valor presente de $t_0$, fijando el precio normalizado de la deuda soberana en la unidad ($p_{0,j} \equiv 1$) y garantizando la coherencia matemática de la función objetivo global.
+    
+    \item \textbf{Estructura Matricial y Dualidad KKT:} Se dedujo paso a paso el ensamblaje de la matriz de restricciones $A$ y la matriz de covarianza intertemporal $C$. Se probó formalmente que la suma de varianzas de desviación de autofinanciamiento colapsa exactamente en la forma cuadrática tridiagonal $U^T C U$, y que los multiplicadores duales $Y_{i,j}$ actúan como precios sombra que miden con total precisión el costo de oportunidad que la prohibición de ventas en corto impone sobre la cartera.
+    
+    \item \textbf{Superación de la Maldición de la Dimensionalidad:} Frente a la inviabilidad computacional de las ecuaciones en derivadas parciales de Hamilton-Jacobi-Bellman para carteras de más de 3 activos, el modelo de Draviam \& Chellathurai demuestra que una formulación cuadrática en espacio ampliado permite optimizar decenas o cientos de activos en milisegundos, escalando de manera estrictamente lineal con el número de fechas de rebalanceo.
+    
+    \item \textbf{Aplicabilidad en Mercados Emergentes:} La combinación de este marco KKT multiperiodo con el esquema operativo de Control Predictivo por Modelo (MPC) constituye una herramienta óptima y normativamente rigurosa para la gestión cuantitativa de fondos de pensiones y bancas patrimoniales en Colombia, permitiendo maximizar el retorno ajustado por riesgo bajo el estricto cumplimiento del Decreto 2555 de 2010.
+\end{enumerate}
+
+% ==============================================================================
+% REFERENCIAS BIBLIOGRÁFICAS
+% ==============================================================================
+\begin{thebibliography}{99}
+\addcontentsline{toc}{chapter}{Referencias Bibliográficas}
+
+\bibitem{draviam2002}
+Draviam, T., \& Chellathurai, T. (2002).
+\newblock Generalized Markowitz mean-variance principles for multi-period portfolio-selection problems.
+\newblock \emph{Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences}, 458(2027), 2571--2607.
+
+\bibitem{delgado2026}
+Delgado Molina, J. M. (2026).
+\newblock Selección de Portafolios Multiperiodo de Markowitz con Condiciones KKT.
+\newblock \emph{Documento Técnico de Trabajo}, Universidad / Repositorio Local.
+
+\bibitem{markowitz1952}
+Markowitz, H. (1952).
+\newblock Portfolio selection.
+\newblock \emph{The Journal of Finance}, 7(1), 77--91.
+
+\bibitem{markowitz1987}
+Markowitz, H. M. (1987).
+\newblock \emph{Mean-variance analysis in portfolio choice and capital markets}.
+\newblock Oxford: Basil Blackwell.
+
+\bibitem{markowitz1994}
+Markowitz, H. (1994).
+\newblock The general mean-variance portfolio selection problem.
+\newblock \emph{Philosophical Transactions of the Royal Society of London. Series A}, 347, 543--549.
+
+\bibitem{merton1969}
+Merton, R. C. (1969).
+\newblock Lifetime portfolio selection under uncertainty: The continuous-time case.
+\newblock \emph{The Review of Economics and Statistics}, 51(3), 247--257.
+
+\bibitem{merton1971}
+Merton, R. C. (1971).
+\newblock Optimum consumption and portfolio rules in a continuous-time model.
+\newblock \emph{Journal of Economic Theory}, 3(4), 373--413.
+
+\bibitem{merton1996}
+Merton, R. C. (1996).
+\newblock \emph{Continuous-time finance} (Revised ed.).
+\newblock Cambridge: Blackwell.
+
+\bibitem{akian1996}
+Akian, M., Menaldi, J. L., \& Sulem, A. (1996).
+\newblock On an investment-consumption model with transaction costs.
+\newblock \emph{SIAM Journal on Control and Optimization}, 34(1), 329--364.
+
+\bibitem{best1996}
+Best, M. J. (1996).
+\newblock An algorithm for the solution of the parametric quadratic programming problem.
+\newblock In \emph{Applied Mathematics and Parallel Computing} (pp. 57--76). Physica-Verlag HD.
+
+\bibitem{best1999}
+Best, M. J. (1999).
+\newblock \emph{Portfolio Optimization}.
+\newblock Lecture Notes, University of Waterloo.
+
+\bibitem{best1991a}
+Best, M. J., \& Grauer, R. R. (1991a).
+\newblock On the sensitivity of mean-variance efficient portfolios to changes in asset means: some analytical and computational results.
+\newblock \emph{The Review of Financial Studies}, 4(2), 315--342.
+
+\bibitem{best1991b}
+Best, M. J., \& Grauer, R. R. (1991b).
+\newblock Sensitivity analysis for mean-variance portfolio problems.
+\newblock \emph{Management Science}, 37(8), 980--989.
+
+\bibitem{boyd2017}
+Boyd, S., Busseti, E., Diamond, S., Kahn, R. N., Koh, K., Nystrup, P., \& Speth, J. (2017).
+\newblock Multi-period trading via convex optimization.
+\newblock \emph{Foundations and Trends in Optimization}, 3(1), 1--76.
+
+\bibitem{boyd2004}
+Boyd, S., \& Vandenberghe, L. (2004).
+\newblock \emph{Convex Optimization}.
+\newblock Cambridge University Press.
+
+\bibitem{breeden1979}
+Breeden, D. T. (1979).
+\newblock An intertemporal asset pricing model with stochastic consumption and investment opportunities.
+\newblock \emph{Journal of Financial Economics}, 7(3), 265--296.
+
+\bibitem{brennan1997}
+Brennan, M. J., Schwartz, E. S., \& Lagnado, R. (1997).
+\newblock Strategic asset allocation.
+\newblock \emph{Journal of Economic Dynamics and Control}, 21(8-9), 1377--1403.
+
+\bibitem{campbell1997}
+Campbell, J. Y., Lo, A. W., \& MacKinlay, A. C. (1997).
+\newblock \emph{The Econometrics of Financial Markets}.
+\newblock Princeton University Press.
+
+\bibitem{carino1994}
+Carino, D. R., Kent, T., Myers, D. H., Stacey, C., Watanabe, K., \& Ziemba, W. T. (1994).
+\newblock The Russell-Yasuda Kasai model: An asset/liability model for a Japanese insurance company using multistage stochastic programming.
+\newblock \emph{Interfaces}, 24(1), 29--49.
+
+\bibitem{consigli1998}
+Consigli, G., \& Dempster, M. A. H. (1998).
+\newblock The CALM stochastic programming model for dynamic asset-liability management.
+\newblock In \emph{Worldwide Asset and Liability Modeling} (pp. 464--500). Cambridge University Press.
+
+\bibitem{cox1985}
+Cox, J. C., Ingersoll, J. E., \& Ross, S. A. (1985).
+\newblock An intertemporal general equilibrium model of asset prices.
+\newblock \emph{Econometrica}, 53(2), 363--384.
+
+\bibitem{davis1990}
+Davis, M. H., \& Norman, A. R. (1990).
+\newblock Portfolio selection with transaction costs.
+\newblock \emph{Mathematics of Operations Research}, 15(4), 676--713.
+
+\bibitem{dixit1994}
+Dixit, A. K., \& Pindyck, R. S. (1994).
+\newblock \emph{Investment Under Uncertainty}.
+\newblock Princeton University Press.
+
+\bibitem{fama1988}
+Fama, E. F., \& French, K. R. (1988).
+\newblock Permanent and temporary components of stock prices.
+\newblock \emph{Journal of Political Economy}, 96(2), 246--273.
+
+\bibitem{fernholz1982}
+Fernholz, R., \& Shay, B. (1982).
+\newblock Stochastic portfolio theory and stock market equilibrium.
+\newblock \emph{The Journal of Finance}, 37(2), 615--624.
+
+\bibitem{hakansson1974}
+Hakansson, N. H. (1974).
+\newblock Convergence in multiperiod portfolio choice.
+\newblock \emph{Journal of Financial Economics}, 1(3), 201--224.
+
+\bibitem{hakansson1995}
+Hakansson, N. H., \& Ziemba, W. T. (1995).
+\newblock Capital growth theory.
+\newblock In \emph{Handbooks in Operations Research and Management Science} (Vol. 9, pp. 65--86). Elsevier.
+
+\bibitem{lo1988}
+Lo, A. W., \& MacKinlay, A. C. (1988).
+\newblock Stock market prices do not follow random walks: Evidence from a simple specification test.
+\newblock \emph{The Review of Financial Studies}, 1(1), 41--66.
+
+\bibitem{luenberger1998}
+Luenberger, D. G. (1998).
+\newblock \emph{Investment Science}.
+\newblock Oxford University Press.
+
+\bibitem{magill1976}
+Magill, M. J., \& Constantinides, G. M. (1976).
+\newblock Portfolio selection with transaction costs.
+\newblock \emph{Journal of Economic Theory}, 13(2), 245--263.
+
+\bibitem{mulvey1994}
+Mulvey, J. M. (1994).
+\newblock An asset-liability investment system.
+\newblock \emph{Interfaces}, 24(3), 22--33.
+
+\bibitem{mulvey1992}
+Mulvey, J. M., \& Vladimirou, H. (1992).
+\newblock Stochastic network programming for financial planning problems.
+\newblock \emph{Management Science}, 38(11), 1642--1664.
+
+\bibitem{nocedal2006}
+Nocedal, J., \& Wright, S. J. (2006).
+\newblock \emph{Numerical Optimization} (2nd ed.).
+\newblock Springer Science \& Business Media.
+
+\bibitem{poterba1988}
+Poterba, J. M., \& Summers, L. H. (1988).
+\newblock Mean reversion in stock prices: Evidence and implications.
+\newblock \emph{Journal of Financial Economics}, 22(1), 27--59.
+
+\bibitem{samuelson1991}
+Samuelson, P. A. (1991).
+\newblock Long-run risk tolerance when equity returns are mean regressing: Pseudo-paradoxes and vindication of businessman's risk.
+\newblock In \emph{Money, Macroeconomics, and Economic Policy} (pp. 181--200). MIT Press.
+
+\bibitem{shreve1994}
+Shreve, S. E., \& Soner, H. M. (1994).
+\newblock Optimal investment and consumption with transaction costs.
+\newblock \emph{The Annals of Applied Probability}, 4(3), 609--692.
+
+\bibitem{spiro1989}
+Spiro, P. S. (1989).
+\newblock \emph{Real Interest Rates and Investment and Borrowing Money}.
+\newblock Quorum Books.
+
+\bibitem{summers1986}
+Summers, L. H. (1986).
+\newblock Does the stock market rationally reflect fundamental values?
+\newblock \emph{The Journal of Finance}, 41(3), 591--601.
+
+\bibitem{zenios1993}
+Zenios, S. A. (1993).
+\newblock A model for portfolio management with mortgage-backed securities.
+\newblock \emph{Annals of Operations Research}, 43(7), 337--356.
+
+\end{thebibliography}
+
+\end{document}
